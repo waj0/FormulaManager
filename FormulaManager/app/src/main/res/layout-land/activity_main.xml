@@ -1,0 +1,15 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:baselineAligned="false">
+
+    <fragment class="cz.fi.android.formulamanager.app.FormulaListFragment"
+        android:id="@+id/formulas" android:layout_weight="1"
+        android:layout_width="0px" android:layout_height="match_parent" />
+
+    <FrameLayout android:id="@+id/details" android:layout_weight="3"
+        android:layout_width="0px" android:layout_height="match_parent"
+        android:background="?android:attr/detailsElementBackground" />
+
+</LinearLayout>

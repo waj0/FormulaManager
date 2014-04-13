@@ -79,13 +79,17 @@ public class CalculationFragment extends Fragment {
         }
 
         ScrollView scroller = new ScrollView(getActivity());
-        TextView name = new TextView(getActivity());
+        //TODO display proper formula stuff here
         int padding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 4, getActivity().getResources().getDisplayMetrics());
-        name.setPadding(padding, padding, padding, padding);
-        scroller.addView(name);
-        //TODO display proper formula stuff here
-        name.setText(FormulaListFragment.values[getShownIndex()]);
+        TextView text = new TextView(getActivity());
+        text.setPadding(padding, padding, padding, padding);
+        text.setText(MainActivity.valuesFromDB.get(getShownIndex()).getName());
+        text.append("\n" + MainActivity.valuesFromDB.get(getShownIndex()).getParamsAsString());
+        text.append("\n" + MainActivity.valuesFromDB.get(getShownIndex()).getParsable());
+        text.append("\n" + MainActivity.valuesFromDB.get(getShownIndex()).getDescription());
+
+        scroller.addView(text);
         return scroller;
     }
 }

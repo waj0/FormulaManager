@@ -12,6 +12,8 @@ import android.support.v4.view.MenuItemCompat;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.util.Log;
@@ -21,12 +23,15 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by Majo on 9. 4. 2014.
  */
 public class FormulaListFragment extends ListFragment {
+    public static final String F_ID = "cz.fi.android.formulamanager.id";
     public static final String F_INDEX = "cz.fi.android.formulamanager.position";
     public static final String F_LABEL = "cz.fi.android.formulamanager.label";
     public static final String F_EDIT = "cz.fi.android.formulamanager.edit";
@@ -35,11 +40,6 @@ public class FormulaListFragment extends ListFragment {
 
     private boolean mDualPane;
     private int mCurCheckPosition = 0;
-
-    //TODO delete dummy values
-    public static final String[] values = new String[] { "Android", "iPhone", "WindowsMobile",
-            "Blackberry", "WebOS", "Ubuntu", "Windows7", "Max OS X",
-            "Linux", "OS/2", "BlackberryA", "WebOSA", "UbuntuA", "Windows7A", "Max OS XA", "BlackberryB", "WebOSB", "UbuntuB", "Windows7B", "Max OS XB" };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -59,7 +59,7 @@ public class FormulaListFragment extends ListFragment {
         setHasOptionsMenu(true);
 
         //TODO reset list here
-        FormulaAdapter adapter = new FormulaAdapter(getActivity(), Arrays.asList(values));
+        FormulaAdapter adapter = new FormulaAdapter(getActivity(), MainActivity.valuesFromDB);
         setListAdapter(adapter);
 
         //listener for long click on list item - starts editation of formula
@@ -68,17 +68,14 @@ public class FormulaListFragment extends ListFragment {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.i(TAG, position + " long click");
+                Formula f = (Formula) getListView().getAdapter().getItem(position);
                 Intent intent = new Intent(getActivity(), CreationActivity.class);
-                TextView textView = (TextView) view.findViewById(R.id.label);
 
-                String message = textView.getText().toString();
-                intent.putExtra(F_LABEL, message);
-                intent.putExtra(F_INDEX, position);
+                intent.putExtra(F_ID, f.getId()); //TODO put stuff in intent for creation activity for editing formula
+
                 //put true so creation activity edit existing formula
                 intent.putExtra(F_EDIT, true);
-                //TODO put stuff in intent for creation activity for editing formula
                 startActivity(intent);
-
                 return true;
             }
         });
@@ -133,7 +130,7 @@ public class FormulaListFragment extends ListFragment {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 //TODO reset list here
-                setListAdapter(new FormulaAdapter(getActivity(),Arrays.asList(values)));
+                setListAdapter(new FormulaAdapter(getActivity(),MainActivity.valuesFromDB));
                 return true;
             }
         });

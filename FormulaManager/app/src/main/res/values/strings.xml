@@ -10,6 +10,17 @@
     <string name="search_hint">Search Formula</string>
     <string name="action_new">Add Formula</string>
     <string name="action_share">Share Formula</string>
-
+    <string name="label_name">Name your new formula</string>
+    <string name="label_formula">Formula</string>
+    <string name="label_params">Parameters</string>
+    <string name="label_add">Add</string>
+    <string name="label_ok">OK</string>
+    <string name="label_save">Save</string>
+    <string name="label_cancel">Cancel</string>
+    <string name="label_param_name">Name your new parameter</string>
+    <string name="label_param_type1">Regular</string>
+    <string name="label_param_type2">Index</string>
+    <string name="label_param_type3">Stepping</string>
+    <string name="title_param_create">New parameter for formula</string>
 
 </resources>

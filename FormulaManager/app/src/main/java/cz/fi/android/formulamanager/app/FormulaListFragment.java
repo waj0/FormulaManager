@@ -12,8 +12,7 @@ import android.support.v4.view.MenuItemCompat;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.util.Log;
@@ -21,19 +20,15 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by Majo on 9. 4. 2014.
  */
 public class FormulaListFragment extends ListFragment {
+    public static final String FORMULA = "cz.fi.android.formulamanager.formula";
     public static final String F_ID = "cz.fi.android.formulamanager.id";
     public static final String F_INDEX = "cz.fi.android.formulamanager.position";
-    public static final String F_LABEL = "cz.fi.android.formulamanager.label";
     public static final String F_EDIT = "cz.fi.android.formulamanager.edit";
     public static final String F_CHOICE = "cz.fi.android.formulamanager.choice";
     private static final String TAG = "cz.fi.android.formulamanager.FormulaListFragment";
@@ -58,9 +53,11 @@ public class FormulaListFragment extends ListFragment {
         //we got some new action bar icons here
         setHasOptionsMenu(true);
 
-        //TODO reset list here
+        //TODO reset list here, get values from DB
         FormulaAdapter adapter = new FormulaAdapter(getActivity(), MainActivity.valuesFromDB);
         setListAdapter(adapter);
+
+        getListView().setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
 
         //listener for long click on list item - starts editation of formula
         getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -70,9 +67,8 @@ public class FormulaListFragment extends ListFragment {
                 Log.i(TAG, position + " long click");
                 Formula f = (Formula) getListView().getAdapter().getItem(position);
                 Intent intent = new Intent(getActivity(), CreationActivity.class);
-
-                intent.putExtra(F_ID, f.getId()); //TODO put stuff in intent for creation activity for editing formula
-
+                //put formula to edit into intent
+                intent.putExtra(FORMULA,f);
                 //put true so creation activity edit existing formula
                 intent.putExtra(F_EDIT, true);
                 startActivity(intent);
@@ -85,6 +81,7 @@ public class FormulaListFragment extends ListFragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Log.i(TAG, i + " short click");
+                getListView().setItemChecked(i, false);
                 showDetails(i);
             }
         });
@@ -129,7 +126,7 @@ public class FormulaListFragment extends ListFragment {
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
-                //TODO reset list here
+                //TODO reset list here get values from DB
                 setListAdapter(new FormulaAdapter(getActivity(),MainActivity.valuesFromDB));
                 return true;
             }
@@ -202,7 +199,7 @@ public class FormulaListFragment extends ListFragment {
         } else {
             // Otherwise we need to launch a new activity to display
             // the dialog fragment with selected text.
-            //TODO put stuff in intent for calculation activity
+            //TODO put stuff in intent for calculation activity, probably just ID of formula will be enough
             Intent intent = new Intent();
             intent.setClass(getActivity(), CalculationActivity.class);
             intent.putExtra(F_INDEX, index);

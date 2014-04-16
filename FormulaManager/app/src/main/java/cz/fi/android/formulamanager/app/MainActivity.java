@@ -24,11 +24,11 @@ public class MainActivity extends ActionBarActivity {
             Formula f = new Formula();
             f.setId((long) i);
             f.setName("dummy F " + i);
-            f.setParsable("some parsable string" + i);
-            f.setDescription("long description of formula");
+            f.setRawFormula("some parsable string" + i);
             for(int j = 0;j<i+2;j++) {
                 Parameter p = new Parameter();
-                p.setType(CreateParamDialog.PARAM_REGULAR);
+                p.setId((long)j);
+                p.setType(Parameter.PARAM_REGULAR);
                 p.setName("p " + j);
                 f.addParam(p);
             }

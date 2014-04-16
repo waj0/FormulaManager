@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,10 +36,11 @@ public class CreationActivity extends ActionBarActivity  implements CreateParamD
             @Override
             public void onClick(View view) {
                 newFormula.setName(((EditText) findViewById(R.id.formula_name)).getText().toString());
-                newFormula.setParsable(((EditText) findViewById(R.id.formulaText)).getText().toString());
+                newFormula.setRawFormula(((EditText) findViewById(R.id.formulaText)).getText().toString());
 
-                //TODO add/update formula to DB.
+
                 if(getIntent().getBooleanExtra(FormulaListFragment.F_EDIT, false)) {
+                    //TODO update formula and its params in DB.
                     for (Formula f : MainActivity.valuesFromDB) {
                         if(f.getId() == newFormula.getId()){
                             MainActivity.valuesFromDB.remove(f);
@@ -48,6 +48,7 @@ public class CreationActivity extends ActionBarActivity  implements CreateParamD
                         }
                     }
                 }
+                //TODO add formula and its params to DB.
                 MainActivity.valuesFromDB.add(newFormula);
 
                 //TODO display toast
@@ -62,10 +63,8 @@ public class CreationActivity extends ActionBarActivity  implements CreateParamD
         paramGrid = (GridLayout) findViewById(R.id.params_grid);
         paramGrid.setOrientation(GridLayout.HORIZONTAL);
 
-        //int index = paramGrid.getChildCount()-1;
-        //TODO long text in buttons is problem :/
-        //paramGrid.setColumnCount();//set columns from dispay width and max button width
-
+        //TODO long text in buttons is problem, set columns from dispay width and/or max button width
+        //paramGrid.setColumnCount();
 
         ImageButton addParam = (ImageButton) findViewById(R.id.add_button);
         addParam.setOnClickListener(new View.OnClickListener() {
@@ -77,10 +76,12 @@ public class CreationActivity extends ActionBarActivity  implements CreateParamD
 
         Intent intent = getIntent();
         boolean edit = intent.getBooleanExtra(FormulaListFragment.F_EDIT, false);
-        //TODO decide if editing only name of whole formula
+        //TODO decide whether editing only name or whole formula
         if(edit){
-            Formula fromDB = null;
-            long id = intent.getLongExtra(FormulaListFragment.F_ID, -1);
+
+            Formula fromDB = intent.getParcelableExtra(FormulaListFragment.FORMULA);
+
+/*            long id = intent.getLongExtra(FormulaListFragment.F_ID, -1);
             if(id == -1){
                 return;
             }
@@ -90,16 +91,12 @@ public class CreationActivity extends ActionBarActivity  implements CreateParamD
                     fromDB = f;
                     break;
                 }
-            }
+            }*/
+
             ((EditText)findViewById(R.id.formula_name)).setText(fromDB.getName());
-            ((EditText)findViewById(R.id.formulaText)).setText(fromDB.getParsable());
-            int index = paramGrid.getChildCount()-1;
+            ((EditText)findViewById(R.id.formulaText)).setText(fromDB.getRawFormula());
             for(Parameter p : fromDB.getParams()) {
-                //TODO set listeners to this button  - onclick onlongclick, put upper bound on width use createButton()
-                Button b = new Button(this);
-                b.setText(p.getName());
-                paramGrid.addView(b,index);
-                index++;
+                addParamButton(p);
             }
         }
     }
@@ -123,6 +120,8 @@ public class CreationActivity extends ActionBarActivity  implements CreateParamD
         return super.onOptionsItemSelected(item);
     }
 
+
+
     private void showNoticeDialog() {
         // Create an instance of the dialog fragment and show it
         DialogFragment dialog = new CreateParamDialog();
@@ -132,20 +131,16 @@ public class CreationActivity extends ActionBarActivity  implements CreateParamD
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
-        //TODO set listeners to this button - onclick onlongclick put upper bound on width use createButton()
-        Button result = new Button(this);
-
         CreateParamDialog cpDialog = (CreateParamDialog) dialog;
 
         Parameter p = new Parameter();
+        //set temporary id to parameter TODO replace it with id from DB later
+        p.setId(((long) newFormula.getParams().size()));
         p.setType(cpDialog.getSelectedType());
         p.setName(cpDialog.getParamName());
-        //TODO check if same parameter does not exist already
-        newFormula.addParam(p);
 
-        result.setText(cpDialog.getParamName());
-        int index = paramGrid.getChildCount()-1;
-        paramGrid.addView(result, index);
+        newFormula.addParam(p);
+        addParamButton(p);
     }
 
     @Override
@@ -153,11 +148,14 @@ public class CreationActivity extends ActionBarActivity  implements CreateParamD
 
     }
 
-    // TODO create button
-    private Button createButton(Parameter p) {
+    private void addParamButton(Parameter p) {
         if(p == null) {
-            return null;
+            return;
         }
-        return null;
+        //TODO set onclick onlongclick listeners to this button , maybe put upper bound on width
+        Button b = new Button(this);
+        b.setText(p.getName());
+        int index = paramGrid.getChildCount()-1;
+        paramGrid.addView(b,index);
     }
 }

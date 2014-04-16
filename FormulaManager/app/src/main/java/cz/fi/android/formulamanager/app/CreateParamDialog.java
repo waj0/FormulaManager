@@ -17,17 +17,15 @@ import android.widget.RadioGroup;
  */
 public class CreateParamDialog extends DialogFragment {
 
-    public static final int PARAM_REGULAR = 0; //regular one value param
-    public static final int PARAM_INDEX = 1; //index in summation etc
-    public static final int PARAM_STEP = 2; //increment after each calculation
-
     public interface CreateParamDialogListener {
         public void onDialogPositiveClick(DialogFragment dialog);
+        //TODO maybe we dont need negative method of this interface
         public void onDialogNegativeClick(DialogFragment dialog);
     }
 
     // Use this instance of the interface to deliver action events
-    CreateParamDialogListener mListener;
+    CreateParamDialogListener mListener; //TODO im not sure if this listener should be here on in creation activity, Vanda has in her project exactly this, so check
+
     int selectedType;
     String paramName;
 
@@ -59,21 +57,21 @@ public class CreateParamDialog extends DialogFragment {
         r.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setSelectedType(PARAM_REGULAR);
+                setSelectedType(Parameter.PARAM_REGULAR);
             }
         });
         r = (RadioButton) dialog.findViewById(R.id.radioButton2);
         r.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setSelectedType(PARAM_INDEX);
+                setSelectedType(Parameter.PARAM_INDEX);
             }
         });
         r = (RadioButton) dialog.findViewById(R.id.radioButton3);
         r.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setSelectedType(PARAM_STEP);
+                setSelectedType(Parameter.PARAM_STEP);
             }
         });
         // Inflate and set the layout for the dialog

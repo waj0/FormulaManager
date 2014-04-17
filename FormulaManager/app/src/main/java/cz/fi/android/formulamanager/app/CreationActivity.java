@@ -38,18 +38,10 @@ public class CreationActivity extends ActionBarActivity  implements CreateParamD
                 newFormula.setName(((EditText) findViewById(R.id.formula_name)).getText().toString());
                 newFormula.setRawFormula(((EditText) findViewById(R.id.formulaText)).getText().toString());
 
-
                 if(getIntent().getBooleanExtra(FormulaListFragment.F_EDIT, false)) {
-                    //TODO update formula and its params in DB.
-                    for (Formula f : MainActivity.valuesFromDB) {
-                        if(f.getId() == newFormula.getId()){
-                            MainActivity.valuesFromDB.remove(f);
-                            break;
-                        }
-                    }
+                    //TODO update formula and its params in DB. and somehow reset list in main activity
                 }
-                //TODO add formula and its params to DB.
-                MainActivity.valuesFromDB.add(newFormula);
+                //TODO add formula and its params to DB. and somehow reset list in main activity
 
                 //TODO display toast
                 CreationActivity.this.finish();
@@ -80,18 +72,6 @@ public class CreationActivity extends ActionBarActivity  implements CreateParamD
         if(edit){
 
             Formula fromDB = intent.getParcelableExtra(FormulaListFragment.FORMULA);
-
-/*            long id = intent.getLongExtra(FormulaListFragment.F_ID, -1);
-            if(id == -1){
-                return;
-            }
-            // TODO find formula in DB
-            for(Formula f : MainActivity.valuesFromDB) {
-                if(f.getId() == id) {
-                    fromDB = f;
-                    break;
-                }
-            }*/
 
             ((EditText)findViewById(R.id.formula_name)).setText(fromDB.getName());
             ((EditText)findViewById(R.id.formulaText)).setText(fromDB.getRawFormula());

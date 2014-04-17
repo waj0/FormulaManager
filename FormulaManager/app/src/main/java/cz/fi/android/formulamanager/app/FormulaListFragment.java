@@ -1,18 +1,23 @@
 package cz.fi.android.formulamanager.app;
 
+
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.ListFragment;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.util.Log;
@@ -21,14 +26,14 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.widget.AdapterView;
 
+import de.timroes.android.listview.EnhancedListView;
+
 
 /**
  * Created by Majo on 9. 4. 2014.
  */
-public class FormulaListFragment extends ListFragment {
+public class FormulaListFragment extends Fragment {
     public static final String FORMULA = "cz.fi.android.formulamanager.formula";
-    public static final String F_ID = "cz.fi.android.formulamanager.id";
-    public static final String F_INDEX = "cz.fi.android.formulamanager.position";
     public static final String F_EDIT = "cz.fi.android.formulamanager.edit";
     public static final String F_CHOICE = "cz.fi.android.formulamanager.choice";
     private static final String TAG = "cz.fi.android.formulamanager.FormulaListFragment";
@@ -36,14 +41,24 @@ public class FormulaListFragment extends ListFragment {
     private boolean mDualPane;
     private int mCurCheckPosition = 0;
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return super.onCreateView(inflater, container, savedInstanceState);
+    private FormulaAdapter mAdapter; //TODO change to better adapter
+    private EnhancedListView mListView;
+    private DrawerLayout mDrawerLayout;
+
+    private boolean[] checkedCategories;
+
+    public FormulaListFragment() {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
+        mDrawerLayout = (DrawerLayout) inflater.inflate(R.layout.formula_list_layout, null);
+        //TODO reset list here, get values from DB
+        mAdapter = new FormulaAdapter(getActivity());
+        checkedCategories = new boolean[3];
+        return mDrawerLayout;
+
     }
 
     @Override
@@ -53,22 +68,59 @@ public class FormulaListFragment extends ListFragment {
         //we got some new action bar icons here
         setHasOptionsMenu(true);
 
-        //TODO reset list here, get values from DB
-        FormulaAdapter adapter = new FormulaAdapter(getActivity(), MainActivity.valuesFromDB);
-        setListAdapter(adapter);
+        mDrawerLayout.setDrawerListener(new ActionBarDrawerToggle(getActivity(), mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close ) {
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                getActivity().getActionBar().setTitle(R.string.label_categories);
+                getActivity().invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
 
-        getListView().setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                getActivity().getActionBar().setTitle(R.string.app_name);
+                getActivity().invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
 
+            }
+        });
+
+
+
+        CheckBox category1 = (CheckBox) getActivity().findViewById(R.id.check_cat1);
+        category1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                checkedCategories[0] = b;
+            }
+        });
+        CheckBox category2 = (CheckBox) getActivity().findViewById(R.id.check_cat2);
+        category2.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                checkedCategories[1] = b;
+            }
+        });
+        CheckBox category3 = (CheckBox) getActivity().findViewById(R.id.check_cat3);
+        category3.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                checkedCategories[2] = b;
+            }
+        });
+
+        mListView = (EnhancedListView) getActivity().findViewById(R.id.list);
+        mListView.setAdapter(mAdapter);
         //listener for long click on list item - starts editation of formula
-        getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.i(TAG, position + " long click");
-                Formula f = (Formula) getListView().getAdapter().getItem(position);
+                Formula f = mAdapter.getItem(position);
                 Intent intent = new Intent(getActivity(), CreationActivity.class);
                 //put formula to edit into intent
-                intent.putExtra(FORMULA,f);
+                intent.putExtra(FORMULA, f);
                 //put true so creation activity edit existing formula
                 intent.putExtra(F_EDIT, true);
                 startActivity(intent);
@@ -77,14 +129,35 @@ public class FormulaListFragment extends ListFragment {
         });
 
         //listener for short click on list item - starts calculation
-        getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.i(TAG, i + " short click");
-                getListView().setItemChecked(i, false);
-                showDetails(i);
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Log.i(TAG, position + " short click");
+                mListView.setItemChecked(position, true);
+                showDetails(position);
             }
         });
+
+        mListView.setDismissCallback(new EnhancedListView.OnDismissCallback() {
+            @Override
+            public EnhancedListView.Undoable onDismiss(EnhancedListView enhancedListView, final int position) {
+                final Formula item = mAdapter.getItem(position);
+
+
+                mAdapter.remove(position);
+                return new EnhancedListView.Undoable() {
+                    @Override
+                    public void undo() {
+                        mAdapter.insert(position, item);
+                    }
+                };
+            }
+        });
+
+        mListView.setUndoStyle(EnhancedListView.UndoStyle.MULTILEVEL_POPUP);
+        mListView.enableSwipeToDismiss();
+        mListView.setSwipeDirection(EnhancedListView.SwipeDirection.START);
+        mListView.setSwipingLayout(R.id.row);
 
         // Check to see if we have a frame in which to embed the details
         // fragment directly in the containing UI.
@@ -98,10 +171,19 @@ public class FormulaListFragment extends ListFragment {
 
         if (mDualPane) {
             // In dual-pane mode, the list view highlights the selected item.
-            getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+            mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
             // Make sure our UI is in the correct state.
             showDetails(mCurCheckPosition);
         }
+    }
+
+
+    @Override
+    public void onStop() {
+        if(mListView != null) {
+            mListView.discardUndo();
+        }
+        super.onStop();
     }
 
     // inflating new buttons to action bar
@@ -127,7 +209,7 @@ public class FormulaListFragment extends ListFragment {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 //TODO reset list here get values from DB
-                setListAdapter(new FormulaAdapter(getActivity(),MainActivity.valuesFromDB));
+                mAdapter.resetItems();
                 return true;
             }
         });
@@ -152,9 +234,27 @@ public class FormulaListFragment extends ListFragment {
                 //put false so creation activity create new formula
                 intent.putExtra(FormulaListFragment.F_EDIT, false);
                 startActivity(intent);
-                break;
+                return true;
+            case R.id.action_done:
+                mDrawerLayout.closeDrawers();
+                applyCategories();
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        boolean drawer = mDrawerLayout.isDrawerVisible(Gravity.LEFT);
+        menu.findItem(R.id.action_settings).setVisible(!drawer);
+        menu.findItem(R.id.action_search).setVisible(!drawer);
+        menu.findItem(R.id.action_new).setVisible(!drawer);
+        menu.findItem(R.id.action_done).setVisible(drawer);
+        MenuItem m = menu.findItem(R.id.action_share);
+        if(m != null) {
+            m.setVisible(!drawer);
+            Log.i(TAG, "prepare menu list fragment disable share " + m.isVisible());
+        }
     }
 
     @Override
@@ -175,13 +275,13 @@ public class FormulaListFragment extends ListFragment {
         if (mDualPane) {
             // We can display everything in-place with fragments, so update
             // the list to highlight the selected item and show the data.
-            getListView().setItemChecked(index, true);
+            mListView.setItemChecked(index, true);
 
             // Check what fragment is currently shown, replace if needed.
             CalculationFragment details = (CalculationFragment) getFragmentManager().findFragmentById(R.id.details);
-            if (details == null || details.getShownIndex() != index) {
+            if (details == null || details.getShownId() != mAdapter.getItem(index).getId()) {
                 // Make new fragment to show this selection.
-                details = CalculationFragment.newInstance(index);
+                details = new CalculationFragment(mAdapter.getItem(index));
 
                 // Execute a transaction, replacing any existing fragment
                 // with this one inside the frame.
@@ -199,11 +299,17 @@ public class FormulaListFragment extends ListFragment {
         } else {
             // Otherwise we need to launch a new activity to display
             // the dialog fragment with selected text.
-            //TODO put stuff in intent for calculation activity, probably just ID of formula will be enough
+            //TODO put stuff in intent for calculation activity, whole formula to intent
             Intent intent = new Intent();
             intent.setClass(getActivity(), CalculationActivity.class);
-            intent.putExtra(F_INDEX, index);
+            intent.putExtra(FORMULA, mAdapter.getItem(index));
             startActivity(intent);
         }
+    }
+
+    private void applyCategories() {
+        mAdapter.resetItems();
+        //mListView.setAdapter(mAdapter);
+        //TODO put only formulas from checked categories to list
     }
 }

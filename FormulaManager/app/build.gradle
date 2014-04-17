@@ -22,5 +22,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:+'
     compile 'com.android.support:gridlayout-v7:+'
     compile 'com.android.support:support-v4:19.+'
+    compile 'com.nineoldandroids:library:2.4.0'
+    compile 'de.timroes.android:EnhancedListView:0.3.2@aar'
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }

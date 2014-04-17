@@ -13,4 +13,10 @@
         android:title="@string/action_search"
         app:actionViewClass="android.widget.SearchView"
         app:showAsAction = "collapseActionView|ifRoom" />
+
+    <item android:id="@+id/action_done"
+        android:title="@string/action_done"
+        android:icon="@drawable/ic_action_accept"
+        app:showAsAction="ifRoom|withText"/>
+
 </menu>

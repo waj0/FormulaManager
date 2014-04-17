@@ -21,21 +21,18 @@ public class CalculationFragment extends Fragment {
 
     private static final String TAG = "cz.fi.android.formulamanager.CalculationFragment";
 
+    private Formula formula;
 
-    //TODO button to share is visible if only list is on screen - vertical list fragment - we should it somehow in calculation fragment lifecycle
-    @Override
-    public void onPause() {
-        super.onPause();
-        //share action visible only if calculation fragment is on screen
-        (getActivity().findViewById(R.id.action_share)).setVisibility(View.GONE);
+    public CalculationFragment() {
+        formula = new Formula();
+        formula.setId(0l);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        //share action visible only if calculation fragment is on screen
-        (getActivity().findViewById(R.id.action_share)).setVisibility(View.VISIBLE);
+    public CalculationFragment(Formula formula) {
+        this.formula = formula;
     }
+
+    //TODO button to share is visible if only list is on screen - vertical list fragment - we should remove it somehow in calculation fragment lifecycle
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -49,6 +46,7 @@ public class CalculationFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
         inflater.inflate(R.menu.calculation, menu);
+        Log.i(TAG, "create menu calc fragment");
     }
 
     @Override
@@ -59,30 +57,14 @@ public class CalculationFragment extends Fragment {
         switch(item.getItemId()) {
             case R.id.action_share:
                 //TODO do stuff to share
-                Log.i(TAG, "share this now: " + getArguments().getInt(FormulaListFragment.F_INDEX));
+                Log.i(TAG, "share this now");
         }
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Create a new instance of CalculationFragment, initialized to
-     * show the text at 'index'.
-     */
     //TODO redo this with id of formula not with index
-    public static CalculationFragment newInstance(int index) {
-        CalculationFragment f = new CalculationFragment();
-
-        // Supply index input as an argument.
-        Bundle args = new Bundle();
-        args.putInt(FormulaListFragment.F_INDEX, index);
-        f.setArguments(args);
-
-        return f;
-    }
-
-    //TODO redo this with id of formula not with index
-    public int getShownIndex() {
-        return getArguments().getInt(FormulaListFragment.F_INDEX, 0);
+    public long getShownId() {
+        return formula.getId();
     }
 
     @Override
@@ -103,10 +85,11 @@ public class CalculationFragment extends Fragment {
         int padding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 4, getActivity().getResources().getDisplayMetrics());
         TextView text = new TextView(getActivity());
+
         text.setPadding(padding, padding, padding, padding);
-        text.setText(MainActivity.valuesFromDB.get(getShownIndex()).getName());
-        text.append("\n" + MainActivity.valuesFromDB.get(getShownIndex()).getParamsAsString());
-        text.append("\n" + MainActivity.valuesFromDB.get(getShownIndex()).getRawFormula());
+        text.setText(formula.getName());
+        text.append("\n" + formula.getParamsAsString());
+        text.append("\n" + formula.getRawFormula());
 
         scroller.addView(text);
         return scroller;

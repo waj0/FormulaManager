@@ -13,7 +13,6 @@ public class CalculationActivity extends ActionBarActivity {
 
     private static final String TAG = "cz.fi.android.formulamanager.CalculationActivity";
 
-    //TODO we probably do _not_ need this activity, we could use main activity, just change fragment in main activity to calculation fragment
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,8 +26,7 @@ public class CalculationActivity extends ActionBarActivity {
         }
         if (savedInstanceState == null) {
             // During initial setup, plug in the details fragment.
-            CalculationFragment details = new CalculationFragment();
-            details.setArguments(getIntent().getExtras());
+            CalculationFragment details = new CalculationFragment((Formula) getIntent().getParcelableExtra(FormulaListFragment.FORMULA));
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.add(android.R.id.content, details).commit();
         }

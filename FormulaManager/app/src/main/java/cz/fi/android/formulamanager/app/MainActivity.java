@@ -1,7 +1,6 @@
 package cz.fi.android.formulamanager.app;
 
 
-import android.support.v4.app.ListFragment;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,32 +9,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class MainActivity extends ActionBarActivity {
     private static final String TAG = "cz.fi.android.formulamanager.MainActivity";
-
-    public static  List<Formula> valuesFromDB = dummyVals();
-    public static List<Formula> dummyVals(){
-        List<Formula> ret = new ArrayList<Formula>();
-        //TODO delete dummy values
-        for(int i=0;i<10;i++){
-            Formula f = new Formula();
-            f.setId((long) i);
-            f.setName("dummy F " + i);
-            f.setRawFormula("some parsable string" + i);
-            for(int j = 0;j<i+2;j++) {
-                Parameter p = new Parameter();
-                p.setId((long)j);
-                p.setType(Parameter.PARAM_REGULAR);
-                p.setName("p " + j);
-                f.addParam(p);
-            }
-            ret.add(f);
-        }
-        return ret;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +22,7 @@ public class MainActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+
         return true;
     }
 
@@ -66,7 +42,6 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public void onNewIntent(Intent intent) {
         setIntent(intent);
-        Log.i(TAG, "search triggered");
         handleIntent(intent);
     }
 
@@ -81,15 +56,9 @@ public class MainActivity extends ActionBarActivity {
 
     private void doSearch(String queryStr) {
         //TODO search in DB, may use content provider
-        FormulaAdapter adapter = new FormulaAdapter(this, valuesFromDB.subList(1, 3));
-        ((ListFragment) getSupportFragmentManager().findFragmentById(R.id.formulas)).setListAdapter(adapter);
+        Log.i(TAG,"searched for " + queryStr);
+
         // get a Cursor, prepare the ListAdapter
         // and set it
-    }
-
-    public void addFormula(Formula f) {
-        //TODO add formula to DB
-        valuesFromDB.add(f);
-
     }
 }

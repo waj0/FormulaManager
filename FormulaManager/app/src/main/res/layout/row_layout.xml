@@ -2,21 +2,53 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/row">
+    android:id="@+id/row"
+    android:descendantFocusability="blocksDescendants" >
 
     <ImageView
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:id="@+id/icon"
-        android:src="@drawable/ic_launcher" >
+        android:src="@drawable/ic_launcher">
     </ImageView>
 
     <TextView
-        android:id="@+id/label"
-        android:layout_width="match_parent"
+        android:id="@+id/formula_name"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:text="dummy text"
-        android:textSize="20dp" >
+        android:layout_weight="3"
+        android:textSize="20sp"
+        android:layout_margin="2dp"
+        android:paddingEnd="4dp"
+        android:text="square area"
+        android:layout_gravity="center_vertical|left"
+        android:enabled="false">
     </TextView>
+
+    <TextView
+        android:id="@+id/category"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:layout_gravity="center"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        android:textColor="#7c7c7c"
+        android:layout_margin="2dp"
+        android:paddingEnd="4dp"
+        android:text="geometry">
+    </TextView>
+
+
+    <ImageButton
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical|right"
+        android:id="@+id/favorite"
+        android:src="@drawable/ic_action_not_important"
+        android:background="?android:attr/selectableItemBackground">
+    </ImageButton>
+
 
 </LinearLayout>

@@ -1,7 +1,7 @@
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent">
-    <fragment class="cz.fi.android.formulamanager.app.FormulaListFragment"
+    <fragment class="cz.muni.fi.android.formulaManager.app.UI.FormulaListFragment"
         android:id="@+id/formulas"
         android:layout_width="match_parent" android:layout_height="match_parent" />
 </FrameLayout>

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <fragment class="cz.fi.android.formulamanager.app.CalculationFragment"
+    <fragment class="cz.muni.fi.android.formulaManager.app.UI.CalculationFragment"
         android:id="@+id/content"
         android:layout_width="match_parent" android:layout_height="match_parent" />
 

@@ -8,7 +8,8 @@
     <de.timroes.android.listview.EnhancedListView
         android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:gravity="center" />
     <ScrollView
         android:layout_gravity="left"
         android:background="#fff3f3f3"
@@ -16,6 +17,7 @@
         android:layout_width="240dp"
         >
         <LinearLayout
+            android:id="@+id/drawer_list"
             android:orientation="vertical"
             android:layout_gravity="right"
             android:layout_width="match_parent"
@@ -28,25 +30,6 @@
                 style="@style/SectionHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-            <CheckBox android:id="@+id/check_cat1"
-                style="@android:style/TextAppearance.Medium"
-                android:text="@string/label_category1"
-                android:layout_marginBottom="8dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-            <CheckBox android:id="@+id/check_cat2"
-                style="@android:style/TextAppearance.Medium"
-                android:text="@string/label_category2"
-                android:layout_marginBottom="8dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-            <CheckBox android:id="@+id/check_cat3"
-                style="@android:style/TextAppearance.Medium"
-                android:text="@string/label_category3"
-                android:layout_marginBottom="8dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
 
         </LinearLayout>
     </ScrollView>

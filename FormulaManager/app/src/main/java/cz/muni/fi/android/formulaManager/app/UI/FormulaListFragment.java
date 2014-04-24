@@ -1,9 +1,8 @@
 package cz.muni.fi.android.formulaManager.app.UI;
 
 
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.LoaderManager;
-import android.app.SearchManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -36,8 +35,9 @@ import android.widget.SearchView;
 
 import cz.muni.fi.android.formulaManager.app.Formula;
 import cz.muni.fi.android.formulaManager.app.FormulaAdapter;
+import cz.muni.fi.android.formulaManager.app.Parameter;
 import cz.muni.fi.android.formulaManager.app.R;
-import cz.muni.fi.android.formulaManager.app.database.FormulaProvider;
+import cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper;
 import de.timroes.android.listview.EnhancedListView;
 
 
@@ -77,7 +77,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         super.onCreateView(inflater, container, savedInstanceState);
 
         //TODO reset list here, get values from DB
-        Cursor c = getActivity().getContentResolver().query(FormulaProvider.Formulas.contentUri(), null, null, null, null);
+        Cursor c = getActivity().getContentResolver().query(FormulaSQLHelper.Formulas.contentUri(), null, null, null, null);
         mAdapter = new FormulaAdapter(getActivity(),c, true);
 
         mCurCategoryFilter = new boolean[NUMBER_OF_CATEGORIES];
@@ -172,9 +172,11 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.i(TAG, position + " long click");
+
                 Formula f = mAdapter.getItem(position);
+                fetchParams(f);
+
                 Intent intent = new Intent(getActivity(), CreationActivity.class);
-                //put formula to edit into intent
                 intent.putExtra(FORMULA, f);
                 //put true so creation activity edit existing formula
                 intent.putExtra(F_EDIT, true);
@@ -203,7 +205,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
                 long id = item.getId();
 
                 //TODO flicker problem see https://github.com/timroes/EnhancedListView/issues/10
-                Uri uri = FormulaProvider.Formulas.contentItemUri(id);
+                Uri uri = FormulaSQLHelper.Formulas.contentItemUri(id);
                 getActivity().getContentResolver().delete(uri, null, null);
 
                 //mResolver.delete(FormulaProvider.Formulas.contentUri(), FormulaProvider.Formulas._ID, new String[] {item.getId()+""});
@@ -212,7 +214,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
                     @Override
                     public void undo() {
                         getActivity().getContentResolver().
-                                insert(FormulaProvider.Formulas.contentUri(), Formula.getValues(item));
+                                insert(FormulaSQLHelper.Formulas.contentUri(), Formula.getValues(item));
                     }
                 };
             }
@@ -377,9 +379,12 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
 
             // Check what fragment is currently shown, replace if needed.
             CalculationFragment details = (CalculationFragment) getFragmentManager().findFragmentById(R.id.details);
-            if (details == null || details.getShownId() != mAdapter.getItem(index).getId()) {
+            if (details == null || details.getShownId() != mAdapter.getItemId(index)) {
+                Formula f = mAdapter.getItem(index);
+                fetchParams(f);
+
                 // Make new fragment to show this selection.
-                details = new CalculationFragment(mAdapter.getItem(index));
+                details = new CalculationFragment(f);
 
                 // Execute a transaction, replacing any existing fragment
                 // with this one inside the frame.
@@ -397,6 +402,20 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             intent.setClass(getActivity(), CalculationActivity.class);
             intent.putExtra(FORMULA, mAdapter.getItem(index));
             startActivity(intent);
+        }
+    }
+
+    private void fetchParams(Formula f){
+        SQLiteDatabase db = FormulaSQLHelper.getInstance(getActivity()).getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT * FROM " + FormulaSQLHelper.TABLE_PARAMETERS + " WHERE " + FormulaSQLHelper.Parameters.FORMULA_ID + " = " + f.getId(),null);
+        c.moveToFirst();
+        while (!c.isAfterLast())  {
+            Parameter p = new Parameter();
+            p.setId(c.getLong(c.getColumnIndex(FormulaSQLHelper.Parameters._ID)));
+            p.setName(c.getString(c.getColumnIndex(FormulaSQLHelper.Parameters.NAME)));
+            p.setType(c.getInt(c.getColumnIndex(FormulaSQLHelper.Parameters.TYPE)));
+            f.getParams().add(p);
+            c.moveToNext();
         }
     }
 
@@ -418,7 +437,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         if (mCurNameFilter != null) {
             //searching for names - via SearchView
             //TODO maybe use fulltext search fts3
-            selection.append(FormulaProvider.Formulas.NAME + " LIKE ?");
+            selection.append(FormulaSQLHelper.Formulas.NAME + " LIKE ?");
             selectionArgs = new String[]{"%" + mCurNameFilter + "%"};
         }
         int count = countActiveCategories();
@@ -440,14 +459,14 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             }
             chosenCategories.append(") ");
 
-            selection.append(FormulaProvider.Formulas.CATEGORY + " IN ");
+            selection.append(FormulaSQLHelper.Formulas.CATEGORY + " IN ");
             selection.append(chosenCategories.toString());
         }
 
         // Now create and return a CursorLoader that will take care of
         // creating a Cursor for the data being displayed.
         //Log.i(TAG, selection.toString());
-        return new CursorLoader(getActivity(), FormulaProvider.Formulas.contentUri(), null, selection.toString(), selectionArgs, null);
+        return new CursorLoader(getActivity(), FormulaSQLHelper.Formulas.contentUri(), null, selection.toString(), selectionArgs, null);
     }
 
     private int countActiveCategories(){
@@ -462,7 +481,8 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         // Swap the new cursor in.  (The framework will take care of closing the
         // old cursor once we return.)
-        mAdapter.swapCursor(data);
+        Cursor old = mAdapter.swapCursor(data);
+        if(old != null) {old.close();}
     }
 
     @Override
@@ -470,6 +490,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         // This is called when the last Cursor provided to onLoadFinished()
         // above is about to be closed.  We need to make sure we are no
         // longer using it.
-        mAdapter.swapCursor(null);
+        Cursor old = mAdapter.swapCursor(null);
+        if(old != null) {old.close();}
     }
 }

@@ -60,7 +60,7 @@ public class CreationActivity extends ActionBarActivity  implements CreateParamD
         paramGrid.setOrientation(GridLayout.HORIZONTAL);
 
         //TODO long text in buttons is problem, set columns from dispay width and/or max button width
-        //paramGrid.setColumnCount();
+        paramGrid.setColumnCount(3);
 
         ImageButton addParam = (ImageButton) findViewById(R.id.add_button);
         addParam.setOnClickListener(new View.OnClickListener() {
@@ -75,11 +75,11 @@ public class CreationActivity extends ActionBarActivity  implements CreateParamD
         //TODO decide whether editing only name or whole formula
         if(edit){
 
-            Formula fromDB = intent.getParcelableExtra(FormulaListFragment.FORMULA);
+            newFormula = intent.getParcelableExtra(FormulaListFragment.FORMULA);
 
-            ((EditText)findViewById(R.id.formula_name)).setText(fromDB.getName());
-            ((EditText)findViewById(R.id.formulaText)).setText(fromDB.getRawFormula());
-            for(Parameter p : fromDB.getParams()) {
+            ((EditText)findViewById(R.id.formula_name)).setText(newFormula.getName());
+            ((EditText)findViewById(R.id.formulaText)).setText(newFormula.getRawFormula());
+            for(Parameter p : newFormula.getParams()) {
                 addParamButton(p);
             }
         }

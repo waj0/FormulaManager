@@ -440,20 +440,22 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             selection.append(FormulaSQLHelper.Formulas.NAME + " LIKE ?");
             selectionArgs = new String[]{"%" + mCurNameFilter + "%"};
         }
-        int count = countActiveCategories();
-        if(count != NUMBER_OF_CATEGORIES) {
+        int categoryCount = countActiveCategories();
+        if(categoryCount != NUMBER_OF_CATEGORIES) {
             //filtering for categories
             if(mCurNameFilter != null) {
                 selection.append(and);
             }
             StringBuilder chosenCategories = new StringBuilder(" (");
+            int commas = categoryCount - 1;
             for(int i=0; i<NUMBER_OF_CATEGORIES; i++) {
                 if(mCurCategoryFilter[i]){
                     chosenCategories.append(" '");
                     chosenCategories.append(categoryNames[i]);
                     chosenCategories.append("' ");
-                    if(i+1 != count) {
+                    if(commas != 0) {
                         chosenCategories.append(", ");
+                        commas--;
                     }
                 }
             }
@@ -481,8 +483,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         // Swap the new cursor in.  (The framework will take care of closing the
         // old cursor once we return.)
-        Cursor old = mAdapter.swapCursor(data);
-        if(old != null) {old.close();}
+        mAdapter.swapCursor(data);
     }
 
     @Override
@@ -490,7 +491,6 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         // This is called when the last Cursor provided to onLoadFinished()
         // above is about to be closed.  We need to make sure we are no
         // longer using it.
-        Cursor old = mAdapter.swapCursor(null);
-        if(old != null) {old.close();}
+        mAdapter.swapCursor(null);
     }
 }

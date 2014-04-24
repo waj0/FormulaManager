@@ -27,7 +27,6 @@ public class CalculationFragment extends Fragment {
 
     public CalculationFragment() {
         formula = new Formula();
-        formula.setId(0l);
     }
 
     public CalculationFragment(Formula formula) {

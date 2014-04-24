@@ -8,9 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.provider.BaseColumns;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -27,11 +25,15 @@ public class FormulaProvider extends ContentProvider {
 
     private static final int FORMULAS = 1;
     private static final int FORMULAS_ITEM = 2;
+    private static final int PARAMETERS = 3;
+    private static final int PARAMETERS_ITEM = 4;
 
     private static UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     static {
-        sUriMatcher.addURI(AUTHORITY, Formulas.PATH_FORMULAS, FORMULAS);
-        sUriMatcher.addURI(AUTHORITY, Formulas.PATH_FORMULAS + "/*", FORMULAS_ITEM);
+        sUriMatcher.addURI(AUTHORITY, FormulaSQLHelper.Formulas.PATH_FORMULAS, FORMULAS);
+        sUriMatcher.addURI(AUTHORITY, FormulaSQLHelper.Formulas.PATH_FORMULAS + "/*", FORMULAS_ITEM);
+        sUriMatcher.addURI(AUTHORITY, FormulaSQLHelper.Parameters.PATH_PARAMETERS, PARAMETERS);
+        sUriMatcher.addURI(AUTHORITY, FormulaSQLHelper.Parameters.PATH_PARAMETERS + "/*", PARAMETERS_ITEM);
     }
 
     private FormulaSQLHelper mDatabaseHelper;
@@ -54,21 +56,36 @@ public class FormulaProvider extends ContentProvider {
         final int type = sUriMatcher.match(uri);
         switch (type) {
             case FORMULAS_ITEM: {
-                qb.appendWhere(Formulas._ID + " = " + uri.getLastPathSegment());
+                qb.appendWhere(FormulaSQLHelper.Formulas._ID + " = " + uri.getLastPathSegment());
+                qb.setTables(FormulaSQLHelper.TABLE_FORMULAS);
                 break;
             }
             case FORMULAS: {
                 if (sortOrder == null) {
-                    defaultOrderBy = Formulas.DEFAULT_ORDER_BY;
+                    defaultOrderBy = FormulaSQLHelper.Formulas.DEFAULT_ORDER_BY;
                 } else {
                     defaultOrderBy = sortOrder;
                 }
+                qb.setTables(FormulaSQLHelper.TABLE_FORMULAS);
+                break;
+            }
+            case PARAMETERS_ITEM:{
+                qb.appendWhere(FormulaSQLHelper.Parameters._ID + " = " + uri.getLastPathSegment());
+                qb.setTables(FormulaSQLHelper.TABLE_PARAMETERS);
+                break;
+            }
+            case PARAMETERS:{
+                if (sortOrder == null) {
+                    defaultOrderBy = FormulaSQLHelper.Parameters.DEFAULT_ORDER_BY;
+                } else {
+                    defaultOrderBy = sortOrder;
+                }
+                qb.setTables(FormulaSQLHelper.TABLE_PARAMETERS);
                 break;
             }
             default:
                 throw new IllegalArgumentException("Unsupported uri: " + uri);
         }
-        qb.setTables(FormulaSQLHelper.TABLE_FORMULAS);
 
         if (TextUtils.isEmpty(sortOrder)) {
             sortOrder = defaultOrderBy;
@@ -83,8 +100,8 @@ public class FormulaProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         switch(sUriMatcher.match(uri)) {
-            case FORMULAS: return Formulas.CONTENT_TYPE;
-            case FORMULAS_ITEM: return Formulas.CONTENT_ITEM_TYPE;
+            case FORMULAS: return FormulaSQLHelper.Formulas.CONTENT_TYPE;
+            case FORMULAS_ITEM: return FormulaSQLHelper.Formulas.CONTENT_ITEM_TYPE;
             default: return null;
         }
     }
@@ -100,7 +117,13 @@ public class FormulaProvider extends ContentProvider {
             case FORMULAS: {
                 rowId = db.insert(FormulaSQLHelper.TABLE_FORMULAS, null, values);
                 //Log.i(TAG, "formula rowID:" + rowId);
-                noteUri = ContentUris.withAppendedId(Formulas.contentUri(), rowId);
+                noteUri = ContentUris.withAppendedId(FormulaSQLHelper.Formulas.contentUri(), rowId);
+                break;
+            }
+            case PARAMETERS: {
+                rowId = db.insert(FormulaSQLHelper.TABLE_PARAMETERS, null, values);
+                //Log.i(TAG, "formula rowID:" + rowId);
+                noteUri = ContentUris.withAppendedId(FormulaSQLHelper.Parameters.contentUri(), rowId);
                 break;
             }
             default: throw new IllegalArgumentException("Unknown URI " + uri);
@@ -115,76 +138,88 @@ public class FormulaProvider extends ContentProvider {
         // Validate the requested uri
         SQLiteDatabase db = FormulaSQLHelper.getInstance(getContext()).getWritableDatabase();
         int rowsDeleted = 0;
+        String table = null;
+        String id = null;
         final int type = sUriMatcher.match(uri);
         switch (type) {
+            case FORMULAS_ITEM: {
+                //update selection
+                id = uri.getLastPathSegment();
+                selection = FormulaSQLHelper.Formulas._ID + "=" + id +
+                        (TextUtils.isEmpty(selection) ? "" :  (" and " + selection));
+                // no break;
+            }
             case FORMULAS: {
-                rowsDeleted = db.delete(FormulaSQLHelper.TABLE_FORMULAS, selection, selectionArgs);
-                //Log.i(TAG, "remove id: " + selectionArgs[0] + " - " + rowsDeleted);
+                //set table
+                table = FormulaSQLHelper.TABLE_FORMULAS;
                 break;
             }
-            case  FORMULAS_ITEM: {
-                String id = uri.getLastPathSegment();
-                if (TextUtils.isEmpty(selection)) {
-                    rowsDeleted = db.delete(FormulaSQLHelper.TABLE_FORMULAS,
-                            Formulas._ID + "=" + id,
-                            null);
-                } else {
-                    rowsDeleted = db.delete(FormulaSQLHelper.TABLE_FORMULAS,
-                            Formulas._ID + "=" + id
-                                    + " and " + selection,
-                            selectionArgs);
-                }
+            case  PARAMETERS_ITEM: {
+                //update selection
+                id = uri.getLastPathSegment();
+                selection = FormulaSQLHelper.Parameters._ID + "=" + id +
+                        (TextUtils.isEmpty(selection) ? "" :  (" and " + selection));
+                // no break;
+            }
+            case PARAMETERS: {
+                //set table
+                table = FormulaSQLHelper.TABLE_PARAMETERS;
                 break;
             }
             default: throw new IllegalArgumentException("Unknown URI " + uri);
         }
+        //run command and return
+        rowsDeleted = db.delete(table,selection,selectionArgs);
         getContext().getContentResolver().notifyChange(uri, null);
         return rowsDeleted;
     }
 
     @Override
     public int update(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
-
+        // Validate the requested uri
         SQLiteDatabase db = FormulaSQLHelper.getInstance(getContext()).getWritableDatabase();
         int rowsUpdated = 0;
+        String table = null;
+        String id = null;
         final int type = sUriMatcher.match(uri);
         switch (type) {
+            case FORMULAS_ITEM:{
+                //update selection
+                id = uri.getLastPathSegment();
+                selection = FormulaSQLHelper.Formulas._ID + "=" + id +
+                        (TextUtils.isEmpty(selection) ? "" :  (" and " + selection));
+                // no break;
+            }
             case FORMULAS: {
-                rowsUpdated = db.update(FormulaSQLHelper.TABLE_FORMULAS,
-                        contentValues,
-                        selection,
-                        selectionArgs);
+                //set table
+                table = FormulaSQLHelper.TABLE_FORMULAS;
                 break;
             }
-            case FORMULAS_ITEM:{
-                String id = uri.getLastPathSegment();
-                if (TextUtils.isEmpty(selection)) {
-                    rowsUpdated = db.update(FormulaSQLHelper.TABLE_FORMULAS,
-                            contentValues,
-                            Formulas._ID + "=" + id,
-                            null);
-                } else {
-                    rowsUpdated = db.update(FormulaSQLHelper.TABLE_FORMULAS,
-                            contentValues,
-                            Formulas._ID + "=" + id
-                                    + " and "
-                                    + selection,
-                            selectionArgs);
-                }
+            case PARAMETERS_ITEM:{
+                //update selection
+                id = uri.getLastPathSegment();
+                selection = FormulaSQLHelper.Parameters._ID + "=" + id +
+                        (TextUtils.isEmpty(selection) ? "" :  (" and " + selection));
+                // no break;
+            }
+            case PARAMETERS: {
+                //set table
+                table = FormulaSQLHelper.TABLE_PARAMETERS;
                 break;
             }
             default: throw new IllegalArgumentException("Unknown URI " + uri);
         }
-
+        //run command and return
+        rowsUpdated = db.update(table, contentValues, selection, selectionArgs);
         getContext().getContentResolver().notifyChange(uri, null);
         return rowsUpdated;
     }
 
     private void checkColumns(String[] projection) {
         //TODO add formula columns here
-        String[] available = { Formulas._ID, Formulas.NAME,
-                Formulas.RAWFORMULA, Formulas.CATEGORY,
-                Formulas.VERSION, Formulas.FAVORITE};
+        String[] available = { FormulaSQLHelper.Formulas._ID, FormulaSQLHelper.Formulas.NAME,
+                FormulaSQLHelper.Formulas.RAWFORMULA, FormulaSQLHelper.Formulas.CATEGORY,
+                FormulaSQLHelper.Formulas.VERSION, FormulaSQLHelper.Formulas.FAVORITE};
         if (projection != null) {
             HashSet<String> requestedColumns = new HashSet<String>(Arrays.asList(projection));
             HashSet<String> availableColumns = new HashSet<String>(Arrays.asList(available));
@@ -193,63 +228,5 @@ public class FormulaProvider extends ContentProvider {
                 throw new IllegalArgumentException("Unknown columns in projection");
             }
         }
-    }
-
-    interface FormulaColumns {
-        //TODO add formula columns here
-        String NAME = "name";
-        String RAWFORMULA = "rawFormula";
-        String CATEGORY = "category";
-        //String SVGFORMULA = "svgFormula";
-        String VERSION = "version";
-        String FAVORITE = "favorite";
-    }
-
-    public static class Formulas implements BaseColumns, FormulaColumns {
-        /**
-         * uri path for the list of formulas
-         */
-        static final String PATH_FORMULAS = "formulas";
-
-        /**
-         * mime/content type for list of formulas
-         */
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.cz.muni.fi.android.formulaManager.app.formula";
-
-        /**
-         * mime/content type for formula in the list of formulas
-         */
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.cz.muni.fi.android.formulaManager.app.formula";
-
-        /**
-         * ordered by {@link cz.muni.fi.android.formulaManager.app.database.FormulaProvider.FormulaColumns#NAME}
-         */
-        public static final String DEFAULT_ORDER_BY = NAME;
-
-        private Formulas()
-        {
-        }
-
-        /**
-         * Gets uri for list of formulas.
-         */
-        public static Uri contentUri()
-        {
-            final Uri.Builder b = AUTHORITY_URI.buildUpon();
-            b.appendPath(PATH_FORMULAS);
-            return b.build();
-        }
-
-        /**
-         * Gets uri for one formula in the list of formulas by given {@code id}.
-         */
-        public static Uri contentItemUri(long id)
-        {
-            final Uri.Builder b = AUTHORITY_URI.buildUpon();
-            b.appendPath(PATH_FORMULAS);
-            b.appendPath(String.valueOf(id));
-            return b.build();
-        }
-
     }
 }

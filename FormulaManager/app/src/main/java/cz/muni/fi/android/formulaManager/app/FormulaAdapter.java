@@ -4,14 +4,13 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.widget.CursorAdapter;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import cz.muni.fi.android.formulaManager.app.database.FormulaProvider;
+import cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper;
 
 /**
  * Created by Majo on 9. 4. 2014.
@@ -21,14 +20,12 @@ public class FormulaAdapter extends CursorAdapter{
     private static final String TAG = "cz.muni.fi.android.formulaManager.FormulaAdapter";
 
     LayoutInflater inflater;
-    private ContentResolver mResolver;
 
     //TODO implement methods for category filter, resetitems, update stuff, insert stuff favorites changes and so on
 
     public FormulaAdapter(Context context, Cursor c, boolean autoRequery) {
         super(context, c, autoRequery);
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mResolver = context.getContentResolver();
     }
 
 
@@ -47,11 +44,11 @@ public class FormulaAdapter extends CursorAdapter{
         cursor.moveToPosition(position);
 
         Formula ret = new Formula();
-        ret.setId(cursor.getLong(cursor.getColumnIndex(FormulaProvider.Formulas._ID)));
-        ret.setName(cursor.getString(cursor.getColumnIndex(FormulaProvider.Formulas.NAME)));
-        ret.setRawFormula(cursor.getString(cursor.getColumnIndex(FormulaProvider.Formulas.RAWFORMULA)));
-        ret.setCategory(cursor.getString(cursor.getColumnIndex(FormulaProvider.Formulas.CATEGORY)));
-        int fav = cursor.getInt(cursor.getColumnIndex(FormulaProvider.Formulas.FAVORITE));
+        ret.setId(cursor.getLong(cursor.getColumnIndex(FormulaSQLHelper.Formulas._ID)));
+        ret.setName(cursor.getString(cursor.getColumnIndex(FormulaSQLHelper.Formulas.NAME)));
+        ret.setRawFormula(cursor.getString(cursor.getColumnIndex(FormulaSQLHelper.Formulas.RAWFORMULA)));
+        ret.setCategory(cursor.getString(cursor.getColumnIndex(FormulaSQLHelper.Formulas.CATEGORY)));
+        int fav = cursor.getInt(cursor.getColumnIndex(FormulaSQLHelper.Formulas.FAVORITE));
         ret.setFavorite(fav != 0);
         //TODO ret.setParams();
 
@@ -65,10 +62,10 @@ public class FormulaAdapter extends CursorAdapter{
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        ((TextView) view.findViewById(R.id.formula_name)).setText(cursor.getString(cursor.getColumnIndex(FormulaProvider.Formulas.NAME)));
-        ((TextView) view.findViewById(R.id.category)).setText(cursor.getString(cursor.getColumnIndex(FormulaProvider.Formulas.CATEGORY)));
+        ((TextView) view.findViewById(R.id.formula_name)).setText(cursor.getString(cursor.getColumnIndex(FormulaSQLHelper.Formulas.NAME)));
+        ((TextView) view.findViewById(R.id.category)).setText(cursor.getString(cursor.getColumnIndex(FormulaSQLHelper.Formulas.CATEGORY)));
         ImageButton button = (ImageButton) view.findViewById(R.id.favorite);
-        int favorite = cursor.getInt(cursor.getColumnIndex(FormulaProvider.Formulas.CATEGORY));
+        int favorite = cursor.getInt(cursor.getColumnIndex(FormulaSQLHelper.Formulas.CATEGORY));
 
         if(favorite != 0){
             button.setImageResource(R.drawable.ic_action_not_important);

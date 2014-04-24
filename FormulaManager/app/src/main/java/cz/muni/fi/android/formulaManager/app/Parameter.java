@@ -8,7 +8,7 @@ import android.os.Parcelable;
  */
 public class Parameter implements Parcelable {
 
-    //types of parameters
+    //types of parameters TODO sync with DB
     public static final int PARAM_REGULAR = 0; //regular one value param
     public static final int PARAM_INDEX = 1; //index in summation etc
     public static final int PARAM_STEP = 2; //increment after each calculation

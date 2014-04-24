@@ -7,7 +7,7 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.List;
 
-import cz.muni.fi.android.formulaManager.app.database.FormulaProvider;
+import cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper;
 
     /**
  * Created by Majo on 9. 4. 2014.
@@ -27,11 +27,11 @@ public class Formula implements Parcelable {
 
     public static ContentValues getValues(Formula item) {
         ContentValues cv = new ContentValues();
-        cv.put(FormulaProvider.Formulas._ID, item.getId());
-        cv.put(FormulaProvider.Formulas.NAME, item.getName());
-        cv.put(FormulaProvider.Formulas.RAWFORMULA, item.getRawFormula());
-        cv.put(FormulaProvider.Formulas.CATEGORY, item.getCategory());
-        cv.put(FormulaProvider.Formulas.FAVORITE, item.isFavorite());
+        cv.put(FormulaSQLHelper.Formulas._ID, item.getId());
+        cv.put(FormulaSQLHelper.Formulas.NAME, item.getName());
+        cv.put(FormulaSQLHelper.Formulas.RAWFORMULA, item.getRawFormula());
+        cv.put(FormulaSQLHelper.Formulas.CATEGORY, item.getCategory());
+        cv.put(FormulaSQLHelper.Formulas.FAVORITE, item.isFavorite());
         //TODO add params cv.put(FormulaProvider.Formulas.CATEGORY, item.getParams());
         //TODO maybe version
 

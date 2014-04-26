@@ -1,6 +1,7 @@
 package cz.muni.fi.android.formulaManager.app.UI;
 
 
+import android.app.ActivityOptions;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.LoaderManager;
 import android.content.Context;
@@ -58,10 +59,13 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
     private int mCurCheckPosition = 0;
 
     //TODO categories: 0 favourites; get names from DB somehow
-    public static String[] categoryNames = {"favorite","basic", "geom", "stuff"};
-    private static final int NUMBER_OF_CATEGORIES = 3+1;
+    public static String[] categoryNames = {"basic", "geom", "stuff", "nuclear science"};
+    private static final int NUMBER_OF_CATEGORIES = 4;
     private boolean[] mCurCategoryFilter;
     String mCurNameFilter = null;
+
+
+
 
     private FormulaAdapter mAdapter;
     private EnhancedListView mListView;
@@ -180,7 +184,11 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
                 intent.putExtra(FORMULA, f);
                 //put true so creation activity edit existing formula
                 intent.putExtra(F_EDIT, true);
-                startActivity(intent);
+
+                //set animation
+                //Bundle scaleBundle = ActivityOptions.makeScaleUpAnimation(view,0,0,view.getWidth(), view.getHeight()).toBundle();
+
+                startActivity(intent/*, scaleBundle*/);
                 return true;
             }
         });
@@ -369,7 +377,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
      * displaying a fragment in-place in the current UI, or starting a
      * whole new activity in which it is displayed.
      */
-    void showDetails(int index) {
+    private void showDetails(int index) {
         mCurCheckPosition = index;
 
         if (mDualPane) {
@@ -406,8 +414,11 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
     }
 
     private void fetchParams(Formula f){
-        SQLiteDatabase db = FormulaSQLHelper.getInstance(getActivity()).getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM " + FormulaSQLHelper.TABLE_PARAMETERS + " WHERE " + FormulaSQLHelper.Parameters.FORMULA_ID + " = " + f.getId(),null);
+        Cursor c = getActivity().getContentResolver().query(
+                FormulaSQLHelper.Parameters.contentUri(),
+                null,
+                FormulaSQLHelper.Parameters.FORMULA_ID + " = " + f.getId(),
+                null,null);
         c.moveToFirst();
         while (!c.isAfterLast())  {
             Parameter p = new Parameter();
@@ -417,12 +428,6 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             f.getParams().add(p);
             c.moveToNext();
         }
-    }
-
-    public void doSearch(String queryStr) {
-        //Log.i(TAG,"searched for " + queryStr);
-        mCurNameFilter = queryStr;
-        getActivity().getSupportLoaderManager().restartLoader(0, null, this);
     }
 
     @Override

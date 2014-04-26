@@ -69,7 +69,7 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(INDEX_FORMULA_ID_FK_CREATE);
 
         //TODO delete dummy values, add formula columns here
-        for (int i=0;i<15;i++){
+        for (int i=0;i<100;i++){
             //insert formula
             String formula = "INSERT INTO " + TABLE_FORMULAS +
                     " ( " + Formulas.NAME + ", " +
@@ -78,7 +78,7 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
                     Formulas.FAVORITE + ", " +
                     Formulas.VERSION + " " +
                     ") values ( " +
-                    "'formula" + i + "', 'raw', '" + FormulaListFragment.categoryNames[i%4] + "', 0, 1 " +
+                    "'formula" + i + "', 'raw', '" + FormulaListFragment.categoryNames[i%4] + "', " + i%2 +", 1 " +
                     " );" ;
             sqLiteDatabase.execSQL(formula);
 
@@ -91,7 +91,7 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
             Log.i(TAG," last id = " + lastId);
 
             //insert params
-            for(int j = 0; j<i;j++ ) {
+            for(int j = 0; j<i%10;j++ ) {
                 String param = "INSERT INTO " + TABLE_PARAMETERS +
                         " ( " + Parameters.NAME + ", " +
                         Parameters.TYPE + ", " +
@@ -138,7 +138,7 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
         /**
          * ordered by {@link cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper.FormulaColumns#NAME}
          */
-        public static final String DEFAULT_ORDER_BY = NAME;
+        public static final String DEFAULT_ORDER_BY = CATEGORY;
 
         private Formulas()
         {

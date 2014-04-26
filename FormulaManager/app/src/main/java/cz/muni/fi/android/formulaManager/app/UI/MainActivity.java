@@ -38,22 +38,4 @@ public class MainActivity extends ActionBarActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
-    //TODO probably dont need seach activity, we got onQueryChangeText listener
-    // method for searching formulas
-/*    @Override
-    public void onNewIntent(Intent intent) {
-        setIntent(intent);
-        handleIntent(intent);
-    }
-
-    // method for searching formulas
-    private void handleIntent(Intent intent) {
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-            Log.i(TAG, " MAIN search triggered "+ query);
-            FormulaListFragment fragment = (FormulaListFragment) getSupportFragmentManager().findFragmentById(R.id.formulas);
-            fragment.doSearch(query);
-        }
-    }*/
 }

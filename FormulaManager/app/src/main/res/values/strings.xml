@@ -27,6 +27,7 @@
     <string name="label_param_type2">Index</string>
     <string name="label_param_type3">Stepping</string>
     <string name="title_param_create">New parameter for formula</string>
+    <string name="functions_list_label">Functions list</string>
 
     <string name="drawer_open">drawer opened</string>
     <string name="drawer_close">drawer closed</string>

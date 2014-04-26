@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="list_of_functions">
+        <item></item>
+    </string-array>
+</resources>
+
+
+<!--    -základná aritmetika (+,-,*,/,%,^,!)
+    -konstanty: Pi, E, False, True, Degree, GoldenRation, Infinity
+    -sin, cos, arcSin, arcCos, arcTan, tan, cot, sqrt,
+    -derivation D[Sin[x],x] (D[vzorec,premenna])
+    -exponencialna funkcia: Exp[]
+    -relacne operatory (==, !=, >, <, >=, <=)
+    -binomicke cisla Binomial[10,3]
+    -Log[x] logaritmus
+    -integracia Integrate[funkcia,premenna]
+    -zjendodusenie vzorca Simplify[vzorec]
+    -horna cela cast Ceiling[Pi] = 4
+    -dolna cela cast Floor[Pi] = 3
+    -zaokruhlenie Round[1.1] = 1.0
+    -najvacsi spolocny delitel GCD[x,y,...]
+    -najmensi spolocny nasobok LCM[x,y,...]
+    -absolutna hodnota Abs[x]
+    -limity Limit[funkcia,premenna -> kam sa blizi]
+    -suma Sum[funkcia,{premenna,[optional start],end,[optional step]}]
+    -->

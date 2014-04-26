@@ -1,27 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="list_of_functions">
-        <item></item>
+    <string-array name="function_groups">
+        <item>Constants</item>
+        <item>Goniometrical Operators</item>
+        <item>Relational Operators</item>
     </string-array>
+
+    <string-array name="constants">
+        <item>E</item>
+        <item>PI</item>
+        <item>True</item>
+        <item>False</item>
+        <item>Degree</item>
+        <item>Golden Ratio</item>
+        <item>Infinity</item>
+    </string-array>
+
+    <string-array name="goniometrical_operators">
+        <item>Sine</item>
+        <item>Cosine</item>
+        <item>Tangent</item>
+        <item>Contangent</item>
+        <item>Arcus sine</item>
+        <item>Arcus cosine</item>
+        <item>Arcus tangent</item>
+        <item>Arcus cotangent</item>
+    </string-array>
+
+    <string-array name="relational_operators">
+        <item>Equal to</item>
+        <item>Not equal to</item>
+        <item>Greater than</item>
+        <item>Less than</item>
+        <item>Greater than or equal to</item>
+        <item>Less than or equal to</item>
+    </string-array>
+
 </resources>
 
-
-<!--    -základná aritmetika (+,-,*,/,%,^,!)
-    -konstanty: Pi, E, False, True, Degree, GoldenRation, Infinity
-    -sin, cos, arcSin, arcCos, arcTan, tan, cot, sqrt,
-    -derivation D[Sin[x],x] (D[vzorec,premenna])
-    -exponencialna funkcia: Exp[]
-    -relacne operatory (==, !=, >, <, >=, <=)
-    -binomicke cisla Binomial[10,3]
-    -Log[x] logaritmus
-    -integracia Integrate[funkcia,premenna]
-    -zjendodusenie vzorca Simplify[vzorec]
-    -horna cela cast Ceiling[Pi] = 4
-    -dolna cela cast Floor[Pi] = 3
-    -zaokruhlenie Round[1.1] = 1.0
-    -najvacsi spolocny delitel GCD[x,y,...]
-    -najmensi spolocny nasobok LCM[x,y,...]
-    -absolutna hodnota Abs[x]
-    -limity Limit[funkcia,premenna -> kam sa blizi]
-    -suma Sum[funkcia,{premenna,[optional start],end,[optional step]}]
-    -->

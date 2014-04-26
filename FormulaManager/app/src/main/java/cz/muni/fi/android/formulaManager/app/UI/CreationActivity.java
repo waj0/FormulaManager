@@ -18,6 +18,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -198,38 +199,19 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
 
     private void prepareListData() {
 
-        // Adding child data
-        functionGroups.add("Konstanty");
-        functionGroups.add("Relacne operatory");
-        functionGroups.add("Goniometricke operatory");
+        String[] groups = getResources().getStringArray(R.array.function_groups);
+
+        for(String group:groups) {
+            functionGroups.add(group);
+        }
 
         // Adding child data
-        List<String> constants = new ArrayList<String>();
-        constants.add("E");
-        constants.add("PI");
-        constants.add("Degree");
-        constants.add("False");
-        constants.add("True");
-        constants.add("GoldenRation");
-        constants.add("Infinity");
-
-        List<String> goniometricalOperators = new ArrayList<String>();
-        goniometricalOperators.add("Sine");
-        goniometricalOperators.add("Cosine");
-        goniometricalOperators.add("Tangent");
-        goniometricalOperators.add("Cotangent");
-        goniometricalOperators.add("Arcus sine");
-        goniometricalOperators.add("Arcus cosine");
-        goniometricalOperators.add("Arcus tangent");
-        goniometricalOperators.add("Arcus contangent");
-
-        List<String> relationalOperators = new ArrayList<String>();
-        relationalOperators.add("Equal to");
-        relationalOperators.add("Not equal to");
-        relationalOperators.add("Greater than");
-        relationalOperators.add("Less than");
-        relationalOperators.add("Greater than or equal to");
-        relationalOperators.add("Less than or equal to");
+        List<String> constants = new ArrayList<String>(
+                Arrays.asList(getResources().getStringArray(R.array.constants)));
+        List<String> goniometricalOperators = new ArrayList<String>(
+                Arrays.asList(getResources().getStringArray(R.array.goniometrical_operators)));
+        List<String> relationalOperators = new ArrayList<String>(
+                Arrays.asList(getResources().getStringArray(R.array.relational_operators)));
 
         functionItems.put(functionGroups.get(0), constants);
         functionItems.put(functionGroups.get(1), goniometricalOperators);

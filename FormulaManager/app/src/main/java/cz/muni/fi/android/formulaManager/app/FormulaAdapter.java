@@ -1,15 +1,23 @@
 package cz.muni.fi.android.formulaManager.app;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.widget.CursorAdapter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import cz.muni.fi.android.formulaManager.app.database.FormulaProvider;
 import cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper;
 
 /**
@@ -49,52 +57,61 @@ public class FormulaAdapter extends CursorAdapter{
         ret.setRawFormula(cursor.getString(cursor.getColumnIndex(FormulaSQLHelper.Formulas.RAWFORMULA)));
         ret.setCategory(cursor.getString(cursor.getColumnIndex(FormulaSQLHelper.Formulas.CATEGORY)));
         int fav = cursor.getInt(cursor.getColumnIndex(FormulaSQLHelper.Formulas.FAVORITE));
+        //Log.i(TAG, "favorite: " + fav);
         ret.setFavorite(fav != 0);
-        //TODO ret.setParams();
 
         return ret;
     }
 
     @Override
-    public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-        return inflater.inflate(R.layout.row_layout, viewGroup, false);
+    public View newView(final Context context, final Cursor cursor, ViewGroup viewGroup) {
+        View ret = inflater.inflate(R.layout.row_layout, viewGroup, false);
+//        Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade_in);
+//        animation.setDuration(2000);
+//        ret.setAnimation(animation);
+        final long id = cursor.getLong(cursor.getColumnIndex(FormulaSQLHelper.Formulas._ID));
+        final int favorite = cursor.getInt(cursor.getColumnIndex(FormulaSQLHelper.Formulas.FAVORITE));
+        CheckBox favCheckBox = (CheckBox) ret.findViewById(R.id.favorite);
+        favCheckBox.setChecked(favorite!=0);
+
+       /* favCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean newState) {
+                ContentValues cv = new ContentValues();
+                cv.put(FormulaSQLHelper.Formulas.FAVORITE, (newState?1:0));
+                int rows = context.getContentResolver().update(FormulaSQLHelper.Formulas.contentItemUri(id),cv,FormulaSQLHelper.Formulas._ID + " = " + id,null);
+                Log.i(TAG, "updated " + rows);
+            }
+        });*/
+
+        return ret;
     }
 
     @Override
-    public void bindView(View view, Context context, Cursor cursor) {
+    public void bindView(View view, final Context context, final Cursor cursor) {
         ((TextView) view.findViewById(R.id.formula_name)).setText(cursor.getString(cursor.getColumnIndex(FormulaSQLHelper.Formulas.NAME)));
         ((TextView) view.findViewById(R.id.category)).setText(cursor.getString(cursor.getColumnIndex(FormulaSQLHelper.Formulas.CATEGORY)));
-        ImageButton button = (ImageButton) view.findViewById(R.id.favorite);
-        int favorite = cursor.getInt(cursor.getColumnIndex(FormulaSQLHelper.Formulas.CATEGORY));
-
-        if(favorite != 0){
-            button.setImageResource(R.drawable.ic_action_not_important);
-        }else{
-            button.setImageResource(R.drawable.ic_action_important);
-        }
-        button.setOnClickListener(new View.OnClickListener() {
+       /* Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade_in);
+        animation.setDuration(500);
+        view.setAnimation(animation);*/
+        final long id = cursor.getLong(cursor.getColumnIndex(FormulaSQLHelper.Formulas._ID));
+        final int favorite = cursor.getInt(cursor.getColumnIndex(FormulaSQLHelper.Formulas.FAVORITE));
+        CheckBox favCheckBox = (CheckBox) view.findViewById(R.id.favorite);
+        favCheckBox.setChecked(favorite!=0);
+      /*  favCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View view) {
-                //TODO set onclicklistener
+            public void onCheckedChanged(CompoundButton compoundButton, boolean newState) {
+                ContentValues cv = new ContentValues();
+                cv.put(FormulaSQLHelper.Formulas.FAVORITE, (newState?1:0));
+                int rows = context.getContentResolver().update(FormulaSQLHelper.Formulas.contentItemUri(id),cv,null,null);
+                Log.i(TAG, "updated " + rows);
             }
-        });
+        });*/
 
     }
 
-//            public void onClick(View view) {
-//                ImageButton button = (ImageButton) view;
-//                Formula f = mItems.get(pos);
-//                boolean change = f.isFavorite();
-//                if(change){
-//                    button.setImageResource(R.drawable.ic_action_not_important);
-//                }else{
-//                    button.setImageResource(R.drawable.ic_action_important);
-//                }
-//                f.setFavorite(!change);
-//                //TODO change favorite value in DB
-//            }
-//        });
-//
-//
-
+    @Override
+    public boolean hasStableIds() {
+        return true;
+    }
 }

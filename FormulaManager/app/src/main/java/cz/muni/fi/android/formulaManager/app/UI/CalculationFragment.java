@@ -27,6 +27,7 @@ public class CalculationFragment extends Fragment {
 
     public CalculationFragment() {
         formula = new Formula();
+        formula.setId(0l);
     }
 
     public CalculationFragment(Formula formula) {
@@ -91,6 +92,8 @@ public class CalculationFragment extends Fragment {
         text.setText(formula.getName());
         text.append("\n" + formula.getParamsAsString());
         text.append("\n" + formula.getRawFormula());
+        text.append("\n" + formula.getCategory());
+        text.append("\n" + formula.isFavorite());
 
         scroller.addView(text);
         return scroller;

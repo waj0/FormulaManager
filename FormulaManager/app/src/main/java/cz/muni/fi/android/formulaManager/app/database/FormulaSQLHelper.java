@@ -8,8 +8,6 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import cz.muni.fi.android.formulaManager.app.UI.FormulaListFragment;
-
 /**
  * Created by Majo on 22. 4. 2014.
  */
@@ -19,33 +17,77 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "formulaManager.db";
     public static final String TABLE_FORMULAS = "formulas";
     public static final String TABLE_PARAMETERS= "parameters";
+    public static final String TABLE_CATEGORIES= "categories";
+    public static final String TABLE_VERSION= "version";
 
-    public static final String INDEX_FORMULA_ID_FK= "i_formula_id_fk";
+    public static final String INDEX_PARAMETERS_FORMULA_ID = "i_parameters_formula_id";
+    public static final String INDEX_FORMULA_CATEGORY = "i_formula_category";
+    public static final String INDEX_FORMULA_NAME = "i_formula_name";
 
-    //TODO add formula columns here, add constraints on columns (NOT NULL to almost all of them), param type probably foreing key or reference
-    //TODO create index on formulas' names, maybe on categories too
+    //TODO add formula columns here,
+    /**
+     * simple table for list of categories
+     */
+    private static final String TABLE_CATEGORIES_CREATE =
+            "CREATE TABLE " + TABLE_CATEGORIES + " (" +
+                    Categories.NAME + " text primary key" +
+                    ");";
+
+    /**
+     * table for formulas, category must be value from categories table or null
+     */
     private static final String TABLE_FORMULAS_CREATE =
             "CREATE TABLE " + TABLE_FORMULAS + " (" +
                     Formulas._ID + " integer primary key autoincrement, " +
-                    Formulas.NAME + " text, " +
-                    Formulas.RAWFORMULA + " text, " +
+                    Formulas.NAME + " text not null unique, " +
+                    Formulas.RAWFORMULA + " text not null, " +
                     Formulas.CATEGORY + " text, " +
                     Formulas.FAVORITE + " integer, " +
-                    Formulas.VERSION + " integer " +
+                    " foreign key( " + Formulas.CATEGORY + " ) references " + TABLE_CATEGORIES +" ( " + Categories.NAME + " ) " +
                     ");";
 
+    /**
+     * table for parameters of formulas
+     */
     private static final String TABLE_PARAMETERS_CREATE =
             "CREATE TABLE " + TABLE_PARAMETERS + " (" +
                     Parameters._ID + " integer primary key autoincrement, " +
-                    Parameters.NAME + " text, " +
+                    Parameters.NAME + " text not null, " +
                     Parameters.TYPE + " integer, " +
                     Parameters.FORMULA_ID + " integer, " +
-                    " foreign key( " + Parameters.FORMULA_ID + " ) references " + TABLE_FORMULAS +" ( " + Formulas._ID + " ) " +
+                    " foreign key( " + Parameters.FORMULA_ID + " ) references " + TABLE_FORMULAS +" ( " + Formulas._ID + " ), " +
+                    "unique(" +Parameters.NAME + ", "+ Parameters.FORMULA_ID +") on conflict replace" +
                     ");";
 
-    private static final String INDEX_FORMULA_ID_FK_CREATE =
-            "CREATE INDEX " + INDEX_FORMULA_ID_FK + " ON " +
+    /**
+     * index on formula_id (foreign keys) of parameters
+     */
+    private static final String INDEX_PARAMETERS_FORMULA_ID_CREATE =
+            "CREATE INDEX " + INDEX_PARAMETERS_FORMULA_ID + " ON " +
                     TABLE_PARAMETERS + "(" + Parameters.FORMULA_ID +");";
+
+    /**
+     * index on formula names
+     */
+    private static final String INDEX_FORMULA_NAME_CREATE =
+            "CREATE INDEX " + INDEX_FORMULA_NAME + " ON " +
+                    TABLE_FORMULAS + "(" + Formulas.NAME +");";
+
+    /**
+     * index on formula categories
+     */
+    private static final String INDEX_FORMULA_CATEGORY_CREATE =
+            "CREATE INDEX " + INDEX_FORMULA_CATEGORY + " ON " +
+                    TABLE_FORMULAS + "(" + Formulas.CATEGORY +");";
+
+
+    /**
+     * simple table for version of database
+     */
+    private static final String TABLE_VERSION_CREATE =
+            "CREATE TABLE " + TABLE_VERSION + " ( " +
+                    " version integer " +
+                    ");";
 
     private static final String TAG = "cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper";
 
@@ -64,21 +106,38 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
+        //create tables
+        sqLiteDatabase.execSQL(TABLE_CATEGORIES_CREATE);
         sqLiteDatabase.execSQL(TABLE_FORMULAS_CREATE);
         sqLiteDatabase.execSQL(TABLE_PARAMETERS_CREATE);
-        sqLiteDatabase.execSQL(INDEX_FORMULA_ID_FK_CREATE);
+        sqLiteDatabase.execSQL(TABLE_VERSION_CREATE);
+        String version = "INSERT INTO " + TABLE_VERSION +
+                " ( version ) values ( 1 );";
+        sqLiteDatabase.execSQL(version);
 
-        //TODO delete dummy values, add formula columns here
+        //create indexes
+        sqLiteDatabase.execSQL(INDEX_PARAMETERS_FORMULA_ID_CREATE);
+        sqLiteDatabase.execSQL(INDEX_FORMULA_NAME_CREATE);
+        sqLiteDatabase.execSQL(INDEX_FORMULA_CATEGORY_CREATE);
+
+        //TODO delete dummy values
+        for (int i=0;i<4;i++){
+            String category = "INSERT INTO " + TABLE_CATEGORIES +
+                    " ( " + CategoryColumns.NAME + " ) values ( " +
+                    "'category" + i + "' " +
+                    " );" ;
+            sqLiteDatabase.execSQL(category);
+        }
+
         for (int i=0;i<100;i++){
             //insert formula
             String formula = "INSERT INTO " + TABLE_FORMULAS +
                     " ( " + Formulas.NAME + ", " +
                     Formulas.RAWFORMULA + ", " +
                     Formulas.CATEGORY + ", " +
-                    Formulas.FAVORITE + ", " +
-                    Formulas.VERSION + " " +
+                    Formulas.FAVORITE + " " +
                     ") values ( " +
-                    "'formula" + i + "', 'raw', '" + FormulaListFragment.categoryNames[i%4] + "', " + i%2 +", 1 " +
+                    "'formula" + i + "', 'raw', '" + "category" + (i+3)%4 + "', " + i%2 +
                     " );" ;
             sqLiteDatabase.execSQL(formula);
 
@@ -109,14 +168,27 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
 
     }
 
+    //
+    // Columns definitions of all tables
+    //
+
     interface FormulaColumns {
         //TODO add formula columns here
         String NAME = "name";
         String RAWFORMULA = "rawFormula";
-        String CATEGORY = "category";
+        String CATEGORY = "category"; //TODO delete this column
         //String SVGFORMULA = "svgFormula";
-        String VERSION = "version";
         String FAVORITE = "favorite";
+    }
+
+    interface ParameterColumns {
+        String NAME = "name";
+        String TYPE = "type";
+        String FORMULA_ID = "formula_id";
+    }
+
+    interface CategoryColumns {
+        String NAME = "name";
     }
 
     public static class Formulas implements BaseColumns, FormulaColumns {
@@ -166,11 +238,6 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
         }
     }
 
-    interface ParameterColumns {
-        String NAME = "name";
-        String TYPE = "type";
-        String FORMULA_ID = "formula_id";
-    }
     public static class Parameters implements BaseColumns, ParameterColumns {
         /**
          * uri path for the list of parameters
@@ -214,6 +281,37 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
             final Uri.Builder b = FormulaProvider.AUTHORITY_URI.buildUpon();
             b.appendPath(PATH_PARAMETERS);
             b.appendPath(String.valueOf(id));
+            return b.build();
+        }
+    }
+
+    public static class Categories implements CategoryColumns {
+        /**
+         * uri path for the list of categories
+         */
+        static final String PATH_PARAMETERS = "categories";
+
+        /**
+         * mime/content type for list of categories
+         */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.cz.muni.fi.android.formulaManager.app.category";
+
+        /**
+         * ordered by {@link cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper.CategoryColumns#NAME}
+         */
+        public static final String DEFAULT_ORDER_BY = NAME;
+
+        private Categories()
+        {
+        }
+
+        /**
+         * Gets uri for list of categories.
+         */
+        public static Uri contentUri()
+        {
+            final Uri.Builder b = FormulaProvider.AUTHORITY_URI.buildUpon();
+            b.appendPath(PATH_PARAMETERS);
             return b.build();
         }
     }

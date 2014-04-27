@@ -27,6 +27,7 @@ public class FormulaProvider extends ContentProvider {
     private static final int FORMULAS_ITEM = 2;
     private static final int PARAMETERS = 3;
     private static final int PARAMETERS_ITEM = 4;
+    private static final int CATEGORIES = 5;
 
     private static UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     static {
@@ -34,6 +35,7 @@ public class FormulaProvider extends ContentProvider {
         sUriMatcher.addURI(AUTHORITY, FormulaSQLHelper.Formulas.PATH_FORMULAS + "/*", FORMULAS_ITEM);
         sUriMatcher.addURI(AUTHORITY, FormulaSQLHelper.Parameters.PATH_PARAMETERS, PARAMETERS);
         sUriMatcher.addURI(AUTHORITY, FormulaSQLHelper.Parameters.PATH_PARAMETERS + "/*", PARAMETERS_ITEM);
+        sUriMatcher.addURI(AUTHORITY, FormulaSQLHelper.Categories.PATH_PARAMETERS, CATEGORIES);
     }
 
     private FormulaSQLHelper mDatabaseHelper;
@@ -57,8 +59,7 @@ public class FormulaProvider extends ContentProvider {
         switch (type) {
             case FORMULAS_ITEM: {
                 qb.appendWhere(FormulaSQLHelper.Formulas._ID + " = " + uri.getLastPathSegment());
-                qb.setTables(FormulaSQLHelper.TABLE_FORMULAS);
-                break;
+                //no break;
             }
             case FORMULAS: {
                 if (sortOrder == null) {
@@ -71,8 +72,7 @@ public class FormulaProvider extends ContentProvider {
             }
             case PARAMETERS_ITEM:{
                 qb.appendWhere(FormulaSQLHelper.Parameters._ID + " = " + uri.getLastPathSegment());
-                qb.setTables(FormulaSQLHelper.TABLE_PARAMETERS);
-                break;
+                //no break;
             }
             case PARAMETERS:{
                 if (sortOrder == null) {
@@ -81,6 +81,11 @@ public class FormulaProvider extends ContentProvider {
                     defaultOrderBy = sortOrder;
                 }
                 qb.setTables(FormulaSQLHelper.TABLE_PARAMETERS);
+                break;
+            }
+            case CATEGORIES:{
+                //return mDatabaseHelper.getReadableDatabase().rawQuery("SELECT * FROM " + FormulaSQLHelper.TABLE_CATEGORIES, null);
+                qb.setTables(FormulaSQLHelper.TABLE_CATEGORIES);
                 break;
             }
             default:
@@ -102,6 +107,9 @@ public class FormulaProvider extends ContentProvider {
         switch(sUriMatcher.match(uri)) {
             case FORMULAS: return FormulaSQLHelper.Formulas.CONTENT_TYPE;
             case FORMULAS_ITEM: return FormulaSQLHelper.Formulas.CONTENT_ITEM_TYPE;
+            case PARAMETERS: return FormulaSQLHelper.Parameters.CONTENT_TYPE;
+            case PARAMETERS_ITEM: return FormulaSQLHelper.Parameters.CONTENT_ITEM_TYPE;
+            case CATEGORIES: return FormulaSQLHelper.Categories.CONTENT_TYPE;
             default: return null;
         }
     }
@@ -219,7 +227,7 @@ public class FormulaProvider extends ContentProvider {
         //TODO add formula columns here
         String[] available = { FormulaSQLHelper.Formulas._ID, FormulaSQLHelper.Formulas.NAME,
                 FormulaSQLHelper.Formulas.RAWFORMULA, FormulaSQLHelper.Formulas.CATEGORY,
-                FormulaSQLHelper.Formulas.VERSION, FormulaSQLHelper.Formulas.FAVORITE};
+                FormulaSQLHelper.Formulas.FAVORITE};
         if (projection != null) {
             HashSet<String> requestedColumns = new HashSet<String>(Arrays.asList(projection));
             HashSet<String> availableColumns = new HashSet<String>(Arrays.asList(available));

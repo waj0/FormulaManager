@@ -1,8 +1,6 @@
 package cz.muni.fi.android.formulaManager.app.UI;
 
 
-import android.app.ActivityOptions;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
@@ -58,14 +56,10 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
     private boolean mDualPane;
     private int mCurCheckPosition = 0;
 
-    //TODO categories: 0 favourites; get names from DB somehow
-    public static String[] categoryNames = {"basic", "geom", "stuff", "nuclear science"};
-    private static final int NUMBER_OF_CATEGORIES = 4;
+    private String[] categoryNames;
+    private int categoriesCount;
     private boolean[] mCurCategoryFilter;
     String mCurNameFilter = null;
-
-
-
 
     private FormulaAdapter mAdapter;
     private EnhancedListView mListView;
@@ -80,11 +74,19 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
-        //TODO reset list here, get values from DB
         Cursor c = getActivity().getContentResolver().query(FormulaSQLHelper.Formulas.contentUri(), null, null, null, null);
         mAdapter = new FormulaAdapter(getActivity(),c, true);
 
-        mCurCategoryFilter = new boolean[NUMBER_OF_CATEGORIES];
+        Cursor cats = getActivity().getContentResolver().query(FormulaSQLHelper.Categories.contentUri(),null,null,null,null);
+        categoriesCount = cats.getCount();
+        mCurCategoryFilter = new boolean[categoriesCount];
+        categoryNames = new String[categoriesCount];
+        cats.moveToFirst();
+        int columnIndex = cats.getColumnIndex(FormulaSQLHelper.Categories.NAME);
+        for(int i = 0; i < categoriesCount; i++) {
+            categoryNames[i] = cats.getString(columnIndex);
+            cats.moveToNext();
+        }
 
         mDrawerLayout = (DrawerLayout) inflater.inflate(R.layout.formula_list_layout, container);
         return mDrawerLayout;
@@ -117,7 +119,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         LinearLayout drawerList = (LinearLayout) getActivity().findViewById(R.id.drawer_list);
         ViewGroup.MarginLayoutParams mlp = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         mlp.setMargins(0,0,0,8);
-        for(int i = 0; i < NUMBER_OF_CATEGORIES; i++) {
+        for(int i = 0; i < categoriesCount; i++) {
             final int pos = i;
             mCurCategoryFilter[i] = true;
 
@@ -446,14 +448,14 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             selectionArgs = new String[]{"%" + mCurNameFilter + "%"};
         }
         int categoryCount = countActiveCategories();
-        if(categoryCount != NUMBER_OF_CATEGORIES) {
+        if(categoryCount != categoriesCount) {
             //filtering for categories
             if(mCurNameFilter != null) {
                 selection.append(and);
             }
             StringBuilder chosenCategories = new StringBuilder(" (");
             int commas = categoryCount - 1;
-            for(int i=0; i<NUMBER_OF_CATEGORIES; i++) {
+            for(int i=0; i< categoriesCount; i++) {
                 if(mCurCategoryFilter[i]){
                     chosenCategories.append(" '");
                     chosenCategories.append(categoryNames[i]);

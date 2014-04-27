@@ -23,17 +23,14 @@ public class Formula implements Parcelable {
     private boolean favorite;
     private String category;
 
-    //TODO we probably dont need version here, but just in case
-
     public static ContentValues getValues(Formula item) {
+        //TODO if putting formula to DB, dont forget to also put params there
         ContentValues cv = new ContentValues();
         cv.put(FormulaSQLHelper.Formulas._ID, item.getId());
         cv.put(FormulaSQLHelper.Formulas.NAME, item.getName());
         cv.put(FormulaSQLHelper.Formulas.RAWFORMULA, item.getRawFormula());
         cv.put(FormulaSQLHelper.Formulas.CATEGORY, item.getCategory());
         cv.put(FormulaSQLHelper.Formulas.FAVORITE, item.isFavorite());
-        //TODO add params cv.put(FormulaProvider.Formulas.CATEGORY, item.getParams());
-        //TODO maybe version
 
         return cv;
     }

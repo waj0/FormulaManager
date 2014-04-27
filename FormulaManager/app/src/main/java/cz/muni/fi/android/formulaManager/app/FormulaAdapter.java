@@ -1,23 +1,14 @@
 package cz.muni.fi.android.formulaManager.app;
 
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.widget.CursorAdapter;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
-import cz.muni.fi.android.formulaManager.app.database.FormulaProvider;
 import cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper;
 
 /**
@@ -29,22 +20,12 @@ public class FormulaAdapter extends CursorAdapter{
 
     LayoutInflater inflater;
 
-    //TODO implement methods for category filter, resetitems, update stuff, insert stuff favorites changes and so on
+    //TODO favorites changes
 
     public FormulaAdapter(Context context, Cursor c, boolean autoRequery) {
         super(context, c, autoRequery);
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
-
-
-  /*  @Override
-    public long getItemId(int position) {
-        Cursor cursor = getCursor();
-        cursor.moveToPosition(position);
-        Log.i(TAG, cursor.getCount() + " / " + position);
-        Log.i(TAG, "column index: " + cursor.getColumnCount());
-        return cursor.getLong(cursor.getColumnIndex(FormulaProvider.Formulas._ID));
-    }*/
 
     @Override
     public Formula getItem(int position) {

@@ -15,9 +15,6 @@
     <string name="label_formula">Formula</string>
     <string name="label_params">Parameters</string>
     <string name="label_categories">Formula categories</string>
-    <string name="label_category1">1. cat</string>
-    <string name="label_category2">cat2</string>
-    <string name="label_category3">cat 3</string>
     <string name="label_add">Add</string>
     <string name="label_ok">OK</string>
     <string name="label_save">Save</string>

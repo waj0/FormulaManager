@@ -2,7 +2,7 @@
 <resources>
     <string-array name="function_groups">
         <item>Constants</item>
-        <item>Goniometrical Operators</item>
+        <item>Trigonometric Operators</item>
         <item>Relational Operators</item>
     </string-array>
 
@@ -16,15 +16,15 @@
         <item>Infinity</item>
     </string-array>
 
-    <string-array name="goniometrical_operators">
+    <string-array name="trigonometric_operators">
         <item>Sine</item>
         <item>Cosine</item>
         <item>Tangent</item>
-        <item>Contangent</item>
-        <item>Arcus sine</item>
-        <item>Arcus cosine</item>
-        <item>Arcus tangent</item>
-        <item>Arcus cotangent</item>
+        <item>Cotangent</item>
+        <item>Arc sine</item>
+        <item>Arc cosine</item>
+        <item>Arc tangent</item>
+        <item>Arc cotangent</item>
     </string-array>
 
     <string-array name="relational_operators">

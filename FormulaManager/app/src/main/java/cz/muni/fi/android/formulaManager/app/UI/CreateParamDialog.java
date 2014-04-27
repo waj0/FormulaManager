@@ -26,7 +26,7 @@ public class CreateParamDialog extends DialogFragment {
     }
 
     // Use this instance of the interface to deliver action events
-    CreateParamDialogListener mListener; //TODO im not sure if this listener should be here on in creation activity, Vanda has in her project exactly this, so check
+    CreateParamDialogListener mListener;
 
     int selectedType;
     String paramName;

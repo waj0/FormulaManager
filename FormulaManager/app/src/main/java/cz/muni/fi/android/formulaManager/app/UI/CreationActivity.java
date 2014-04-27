@@ -100,7 +100,8 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
                 if (getIntent().getBooleanExtra(FormulaListFragment.F_EDIT, false)) {
                     //TODO update formula and its params in DB. and somehow reset list in main activity
                 }
-                //TODO add formula and its params to DB. and somehow reset list in main activity
+                //TODO add formula and its params to DB. and somehow reset list in main activity, set category to null if it is user own formula
+                //TODO put also params to DB and set them (to objects) proper id - see onDialogPositiveClick()
 
                 //TODO display toast
                 CreationActivity.this.finish();
@@ -209,7 +210,7 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
         List<String> constants = new ArrayList<String>(
                 Arrays.asList(getResources().getStringArray(R.array.constants)));
         List<String> goniometricalOperators = new ArrayList<String>(
-                Arrays.asList(getResources().getStringArray(R.array.goniometrical_operators)));
+                Arrays.asList(getResources().getStringArray(R.array.trigonometric_operators)));
         List<String> relationalOperators = new ArrayList<String>(
                 Arrays.asList(getResources().getStringArray(R.array.relational_operators)));
 

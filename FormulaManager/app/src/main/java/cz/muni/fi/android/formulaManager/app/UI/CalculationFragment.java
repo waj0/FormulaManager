@@ -64,7 +64,6 @@ public class CalculationFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    //TODO redo this with id of formula not with index
     public long getShownId() {
         return formula.getId();
     }

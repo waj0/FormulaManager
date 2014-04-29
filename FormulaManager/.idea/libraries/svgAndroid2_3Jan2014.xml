@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="svgAndroid2-3Jan2014">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/app/libs/svgAndroid2-3Jan2014.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

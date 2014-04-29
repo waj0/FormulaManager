@@ -1,6 +1,7 @@
 package cz.muni.fi.android.formulaManager.app.UI;
 
 
+import android.content.ContentValues;
 import android.support.v4.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +16,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -31,9 +33,10 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.TextView;
 
 import cz.muni.fi.android.formulaManager.app.Formula;
-import cz.muni.fi.android.formulaManager.app.FormulaAdapter;
+//import cz.muni.fi.android.formulaManager.app.FormulaAdapter;
 import cz.muni.fi.android.formulaManager.app.Parameter;
 import cz.muni.fi.android.formulaManager.app.R;
 import cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper;
@@ -61,7 +64,9 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
     private boolean[] mCurCategoryFilter;
     String mCurNameFilter = null;
 
-    private FormulaAdapter mAdapter;
+    private CheckedListender mFavOnCheckedChangeListener = new CheckedListender();
+
+    private SimpleCursorAdapter mAdapter;
     private EnhancedListView mListView;
 
     private DrawerLayout mDrawerLayout;
@@ -75,15 +80,50 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         super.onCreateView(inflater, container, savedInstanceState);
 
         Cursor c = getActivity().getContentResolver().query(FormulaSQLHelper.Formulas.contentUri(), null, null, null, null);
-        mAdapter = new FormulaAdapter(getActivity(),c, true);
+        //mAdapter = new FormulaAdapter(getActivity(),c, true);
+
+
+        mAdapter = new SimpleCursorAdapter(getActivity(), R.layout.row_layout, c,
+                new String[] { FormulaSQLHelper.Formulas.NAME, FormulaSQLHelper.Formulas.CATEGORY, FormulaSQLHelper.Formulas.FAVORITE},
+                new int[] { R.id.formula_name, R.id.formula_category, R.id.formula_favorite},0);
+
+        mAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+            @Override
+            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+                int nameColumn = cursor.getColumnIndex(FormulaSQLHelper.Formulas.NAME);
+                int categoryColumn = cursor.getColumnIndex(FormulaSQLHelper.Formulas.CATEGORY);
+                int favoriteColumn = cursor.getColumnIndex(FormulaSQLHelper.Formulas.FAVORITE);
+
+                if (columnIndex == nameColumn || columnIndex == categoryColumn) {
+                    TextView textView = (TextView) view;
+                    textView.setText(cursor.getString(columnIndex));
+                    return true;
+                }
+
+                if(columnIndex == favoriteColumn) {
+                    view.setTag(cursor.getLong(cursor.getColumnIndex(FormulaSQLHelper.Formulas._ID)));
+                    CheckBox chB = (CheckBox) view;
+
+                    chB.setOnCheckedChangeListener(null);
+                    int favorite = cursor.getInt(columnIndex);
+                    chB.setChecked(favorite!=0);
+                    chB.setOnCheckedChangeListener(mFavOnCheckedChangeListener);
+
+                    return true;
+                }
+                return false;
+            }
+        });
 
         Cursor cats = getActivity().getContentResolver().query(FormulaSQLHelper.Categories.contentUri(),null,null,null,null);
-        categoriesCount = cats.getCount();
+        categoriesCount = cats.getCount() + 1;//+1 for favorites
         mCurCategoryFilter = new boolean[categoriesCount];
         categoryNames = new String[categoriesCount];
+        categoryNames[0] = getString(R.string.show_favs);
+
         cats.moveToFirst();
         int columnIndex = cats.getColumnIndex(FormulaSQLHelper.Categories.NAME);
-        for(int i = 0; i < categoriesCount; i++) {
+        for(int i = 1; i < categoriesCount; i++) {
             categoryNames[i] = cats.getString(columnIndex);
             cats.moveToNext();
         }
@@ -121,11 +161,12 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         mlp.setMargins(0,0,0,8);
         for(int i = 0; i < categoriesCount; i++) {
             final int pos = i;
-            mCurCategoryFilter[i] = true;
+            boolean fill = (i!=0) ; //first should be false, others true
+            mCurCategoryFilter[i] = fill;
 
             CheckBox category = new CheckBox(getActivity());
             category.setText(categoryNames[i]);
-            category.setChecked(true);
+            category.setChecked(fill);
             category.setLayoutParams(mlp);
             category.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
@@ -179,8 +220,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.i(TAG, position + " long click");
 
-                Formula f = mAdapter.getItem(position);
-                fetchParams(f);
+                Formula f = getFormula(position);
 
                 Intent intent = new Intent(getActivity(), CreationActivity.class);
                 intent.putExtra(FORMULA, f);
@@ -211,7 +251,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         mListView.setDismissCallback(new EnhancedListView.OnDismissCallback() {
             @Override
             public EnhancedListView.Undoable onDismiss(EnhancedListView enhancedListView, final int position) {
-                final Formula item = mAdapter.getItem(position);
+                final Formula item = getFormula(position);
                 long id = item.getId();
 
                 //TODO flicker problem see https://github.com/timroes/EnhancedListView/issues/10
@@ -299,9 +339,6 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         MenuItem search = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView)search.getActionView();
 
-        // Associate searchable configuration with the SearchView
-        //SearchManager searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
-        //searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(getActivity().getApplicationContext(), MainActivity.class)));
         searchView.setOnQueryTextListener(this);
 
         // backwards compatible listeners to reset list after search widget was closed
@@ -390,8 +427,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             // Check what fragment is currently shown, replace if needed.
             CalculationFragment details = (CalculationFragment) getFragmentManager().findFragmentById(R.id.details);
             if (details == null || details.getShownId() != mAdapter.getItemId(index)) {
-                Formula f = mAdapter.getItem(index);
-                fetchParams(f);
+                Formula f = getFormula(index);
 
                 // Make new fragment to show this selection.
                 details = new CalculationFragment(f);
@@ -410,9 +446,22 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             //TODO put stuff in intent for calculation activity, whole formula to intent
             Intent intent = new Intent();
             intent.setClass(getActivity(), CalculationActivity.class);
-            intent.putExtra(FORMULA, mAdapter.getItem(index));
+            intent.putExtra(FORMULA, getFormula(index));
             startActivity(intent);
         }
+    }
+
+    private Formula getFormula(int position) {
+        Formula f = new Formula();
+        Cursor c = mAdapter.getCursor();
+        c.moveToPosition(position);
+        f.setId(c.getLong(c.getColumnIndex(FormulaSQLHelper.Formulas._ID)));
+        f.setName(c.getString(c.getColumnIndex(FormulaSQLHelper.Formulas.NAME)));
+        f.setRawFormula(c.getString(c.getColumnIndex(FormulaSQLHelper.Formulas.RAWFORMULA)));
+        f.setCategory(c.getString(c.getColumnIndex(FormulaSQLHelper.Formulas.CATEGORY)));
+        f.setFavorite(c.getInt(c.getColumnIndex(FormulaSQLHelper.Formulas.FAVORITE)) != 0);
+        fetchParams(f);
+        return f;
     }
 
     private void fetchParams(Formula f){
@@ -447,10 +496,16 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             selection.append(FormulaSQLHelper.Formulas.NAME + " LIKE ?");
             selectionArgs = new String[]{"%" + mCurNameFilter + "%"};
         }
+        if(mCurCategoryFilter[0]){
+            if(selection.length() != 0) {
+                selection.append(and);
+            }
+            selection.append(FormulaSQLHelper.Formulas.FAVORITE + " = 1 ");
+        }
         int categoryCount = countActiveCategories();
         if(categoryCount != categoriesCount) {
             //filtering for categories
-            if(mCurNameFilter != null) {
+            if(selection.length() != 0) {
                 selection.append(and);
             }
             StringBuilder chosenCategories = new StringBuilder(" (");
@@ -499,5 +554,17 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         // above is about to be closed.  We need to make sure we are no
         // longer using it.
         mAdapter.swapCursor(null);
+    }
+
+    private class CheckedListender implements CompoundButton.OnCheckedChangeListener{
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean newState) {
+            Log.i(TAG, "" + buttonView.getTag());
+            long id = (Long) buttonView.getTag();
+            ContentValues cv = new ContentValues();
+            cv.put(FormulaSQLHelper.Formulas.FAVORITE, (newState?1:0));
+            int rows = getActivity().getContentResolver().update(FormulaSQLHelper.Formulas.contentItemUri(id),cv,null,null);
+            Log.i(TAG, "updated " + rows + " " + id);
+        }
     }
 }

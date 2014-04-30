@@ -127,14 +127,16 @@ public class CalculationFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = null;
-        if(container!= null) {
+        View view  = inflater.inflate(R.layout.calculation_layout, container, false);
+       /* if(container!= null) {
         view = (View) container.findViewById(R.layout.calculation_layout);
 
         }
         if(view == null) {
             view = (View) inflater.inflate(R.layout.calculation_layout, container,false);
-        }
+        }*/
+
+
         TextView formulaName = (TextView) view.findViewById(R.id.calculation_formula_name);
         formulaName.setText(formula.getName());
         TextView formulaCategory= (TextView) view.findViewById(R.id.calculation_formula_category);

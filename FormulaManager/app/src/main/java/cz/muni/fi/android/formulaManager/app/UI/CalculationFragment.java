@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -142,7 +143,24 @@ public class CalculationFragment extends Fragment {
         if(useRawFormulaFlag) {
             createFormulaText(calculationFormulaContent);
         }
+        ViewGroup calculationParametersLayout = (ViewGroup)  view.findViewById(R.id.calculation_formula_parameters);
+        for (Parameter parameter : formula.getParams()) {
+            createParameterEditField(calculationParametersLayout, parameter);
+        }
+
         return view;
+    }
+
+    private void createParameterEditField(ViewGroup calculationParametersLayout, Parameter parameter) {
+        switch(parameter.getType()){
+
+            case REGULAR:
+                break;
+            case INDEX:
+                break;
+            case STEP:
+                break;
+        }
     }
 
     private void createFormulaText(ViewGroup calculationFormulaContent) {

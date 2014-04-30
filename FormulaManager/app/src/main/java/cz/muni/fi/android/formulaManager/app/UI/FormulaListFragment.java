@@ -476,7 +476,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             Parameter p = new Parameter();
             p.setId(c.getLong(c.getColumnIndex(FormulaSQLHelper.Parameters._ID)));
             p.setName(c.getString(c.getColumnIndex(FormulaSQLHelper.Parameters.NAME)));
-            p.setType(c.getInt(c.getColumnIndex(FormulaSQLHelper.Parameters.TYPE)));
+            p.setType(Parameter.ParameterType.fromIntValue(c.getInt(c.getColumnIndex(FormulaSQLHelper.Parameters.TYPE))));
             f.getParams().add(p);
             c.moveToNext();
         }

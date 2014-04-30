@@ -3,19 +3,48 @@ package cz.muni.fi.android.formulaManager.app;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by Majo on 13. 4. 2014.
  */
 public class Parameter implements Parcelable {
 
     //types of parameters TODO sync with DB
-    public static final int PARAM_REGULAR = 0; //regular one value param
-    public static final int PARAM_INDEX = 1; //index in summation etc
-    public static final int PARAM_STEP = 2; //increment after each calculation
+    public static enum ParameterType {
+    REGULAR(0),  //regular one value param
+    INDEX (1), //index in summation etc
+    STEP(2); //increment after each calculation
 
+        private int value;
+
+        ParameterType(int value) {
+            this.value = value;
+        }
+
+        public int getIntValue() {
+            return value;
+        }
+        private static final Map<Integer, ParameterType> intToTypeMap = new HashMap<Integer, ParameterType>();
+        static {
+            for (ParameterType type : ParameterType.values()) {
+                intToTypeMap.put(type.value, type);
+            }
+        }
+
+        public static ParameterType fromIntValue(int value){
+            ParameterType type = intToTypeMap.get(Integer.valueOf(value));
+            if (type == null)
+                throw new IllegalArgumentException("value " + value +" is out of range");
+            return type;
+        }
+
+
+    }
     Long id;
     String name;
-    int type;
+    ParameterType type;
 
     public Parameter() {
     }
@@ -23,7 +52,7 @@ public class Parameter implements Parcelable {
     public Parameter(Parcel in) {
         this.id = in.readLong();
         this.name = in.readString();
-        this.type = in.readInt();
+        this.type = ParameterType.fromIntValue(in.readInt());
     }
 
     @Override
@@ -35,7 +64,7 @@ public class Parameter implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeLong(this.id);
         parcel.writeString(this.name);
-        parcel.writeInt(this.type);
+        parcel.writeInt(this.type.getIntValue());
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
@@ -64,11 +93,11 @@ public class Parameter implements Parcelable {
         this.name = name;
     }
 
-    public int getType() {
+    public ParameterType getType() {
         return type;
     }
 
-    public void setType(int type) {
+    public void setType(ParameterType type) {
         this.type = type;
     }
 

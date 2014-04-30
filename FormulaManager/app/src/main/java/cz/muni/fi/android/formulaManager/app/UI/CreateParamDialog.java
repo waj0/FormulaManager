@@ -28,7 +28,7 @@ public class CreateParamDialog extends DialogFragment {
     // Use this instance of the interface to deliver action events
     CreateParamDialogListener mListener;
 
-    int selectedType;
+    Parameter.ParameterType selectedType;
     String paramName;
 
 
@@ -59,21 +59,21 @@ public class CreateParamDialog extends DialogFragment {
         r.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setSelectedType(Parameter.PARAM_REGULAR);
+                setSelectedType(Parameter.ParameterType.REGULAR);
             }
         });
         r = (RadioButton) dialog.findViewById(R.id.radioButton2);
         r.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setSelectedType(Parameter.PARAM_INDEX);
+                setSelectedType(Parameter.ParameterType.INDEX);
             }
         });
         r = (RadioButton) dialog.findViewById(R.id.radioButton3);
         r.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setSelectedType(Parameter.PARAM_STEP);
+                setSelectedType(Parameter.ParameterType.STEP);
             }
         });
         // Inflate and set the layout for the dialog
@@ -104,11 +104,11 @@ public class CreateParamDialog extends DialogFragment {
         this.paramName = paramName;
     }
 
-    public int getSelectedType() {
+    public Parameter.ParameterType getSelectedType() {
         return selectedType;
     }
 
-    public void setSelectedType(int selectedType) {
+    public void setSelectedType(Parameter.ParameterType selectedType) {
         this.selectedType = selectedType;
     }
 }

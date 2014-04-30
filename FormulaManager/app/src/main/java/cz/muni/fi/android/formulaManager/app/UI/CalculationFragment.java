@@ -23,11 +23,18 @@ import com.larvalabs.svgandroid.SVG;
 import com.larvalabs.svgandroid.SVGParseException;
 import com.larvalabs.svgandroid.SVGParser;
 
+import org.matheclipse.core.eval.EvalUtilities;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import cz.muni.fi.android.formulaManager.app.Formula;
 import cz.muni.fi.android.formulaManager.app.Parameter;
 import cz.muni.fi.android.formulaManager.app.R;
+import cz.muni.fi.android.formulaManager.app.UI.wrapper.ParameterWrapper;
+import cz.muni.fi.android.formulaManager.app.UI.wrapper.RegularParameterWrapper;
+import cz.muni.fi.android.formulaManager.app.UI.wrapper.StepParameterWrapper;
 
 /**
  * Created by Majo on 10. 4. 2014.
@@ -64,7 +71,9 @@ public class CalculationFragment extends Fragment {
             "</svg>";
 
     private Formula formula;
+    private Map<String,ParameterWrapper> parametersMap;
     private static final ViewGroup.MarginLayoutParams MATCH_PARENT = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+//    private static final EvalUtilities EVALUATION_ENGINE
 
     public CalculationFragment() {
         formula = new Formula();
@@ -73,10 +82,13 @@ public class CalculationFragment extends Fragment {
         formula.setCategory("");
         formula.setParams(new ArrayList<Parameter>());
         formula.setRawFormula("");
+        parametersMap = new HashMap<String, ParameterWrapper>(); {
+        }
     }
 
     public CalculationFragment(Formula formula) {
         this.formula = formula;
+        parametersMap = new HashMap<String, ParameterWrapper>();
     }
 
     //TODO button to share is visible if only list is on screen - vertical list fragment - we should remove it somehow in calculation fragment lifecycle
@@ -152,15 +164,21 @@ public class CalculationFragment extends Fragment {
     }
 
     private void createParameterEditField(ViewGroup calculationParametersLayout, Parameter parameter) {
+        ParameterWrapper parameterWrapper = null;
         switch(parameter.getType()){
 
             case REGULAR:
+                parameterWrapper = new RegularParameterWrapper(getActivity(),calculationParametersLayout,parameter);
                 break;
             case INDEX:
+                // TODO index wrapper
+                parameterWrapper = null;
                 break;
             case STEP:
+                parameterWrapper = new StepParameterWrapper(getActivity(),calculationParametersLayout,parameter);
                 break;
         }
+        parametersMap.put(parameter.getName(),parameterWrapper);
     }
 
     private void createFormulaText(ViewGroup calculationFormulaContent) {

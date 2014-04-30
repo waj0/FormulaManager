@@ -119,6 +119,8 @@ public class Formula implements Parcelable {
 
     public void setSvgFormula(String svgFormula) { this.svgFormula = svgFormula; }
 
+    public boolean hasSvgFormula() {return this.svgFormula != null && !this.svgFormula.isEmpty();}
+
     public boolean isFavorite() {
         return favorite;
     }

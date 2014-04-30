@@ -1,6 +1,5 @@
 package cz.muni.fi.android.formulaManager.app.UI;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.RectF;
 import android.os.Bundle;
@@ -16,11 +15,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 
 import com.larvalabs.svgandroid.SVG;
+import com.larvalabs.svgandroid.SVGParseException;
 import com.larvalabs.svgandroid.SVGParser;
 
 import java.util.ArrayList;
@@ -64,7 +63,7 @@ public class CalculationFragment extends Fragment {
             "</svg>";
 
     private Formula formula;
-    private static final ViewGroup.MarginLayoutParams defaultLayoutParams = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    private static final ViewGroup.MarginLayoutParams MATCH_PARENT = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
     public CalculationFragment() {
         formula = new Formula();
@@ -131,15 +130,38 @@ public class CalculationFragment extends Fragment {
         formulaFavourite.setChecked(formula.isFavorite());
 
         ViewGroup calculationFormulaContent = (ViewGroup)  view.findViewById(R.id.calculation_formula_content);
-
-        ImageView imageView = new ImageView(getActivity());
-
-        SVG svg = SVGParser.getSVGFromString(RAW_SVG);
-        resizeSvgToMatchParent(calculationFormulaContent, svg);
-        imageView.setImageDrawable(svg.createPictureDrawable());
-        imageView.setLayoutParams(defaultLayoutParams);
-        calculationFormulaContent.addView(imageView);
+        boolean useRawFormulaFlag = !formula.hasSvgFormula();
+        Log.d(TAG, formula.hasSvgFormula() ? formula.getSvgFormula() : "null");
+        if(!useRawFormulaFlag)
+            try {
+                    createFormulaImage(calculationFormulaContent);
+                } catch (SVGParseException  ex) {
+//                    svg is broken fallback to textview
+                useRawFormulaFlag = true;
+        }
+        if(useRawFormulaFlag) {
+            createFormulaText(calculationFormulaContent);
+        }
         return view;
+    }
+
+    private void createFormulaText(ViewGroup calculationFormulaContent) {
+        TextView formulaText = new TextView(getActivity());
+        formulaText.setText(formula.getRawFormula());
+        formulaText.setLayoutParams(MATCH_PARENT);
+        formulaText.setBackgroundColor(Color.WHITE);
+        formulaText.setTextColor(Color.BLACK);
+        formulaText.setTextSize(40);
+        calculationFormulaContent.addView(formulaText);
+    }
+
+    private void createFormulaImage(ViewGroup calculationFormulaContent) {
+        SVG svg = SVGParser.getSVGFromString(formula.getSvgFormula());
+        ImageView formulaSvgImage = new ImageView(getActivity());
+        resizeSvgToMatchParent(calculationFormulaContent, svg);
+        formulaSvgImage.setImageDrawable(svg.createPictureDrawable());
+        formulaSvgImage.setLayoutParams(MATCH_PARENT);
+        calculationFormulaContent.addView(formulaSvgImage);
     }
 
     private void resizeSvgToMatchParent(ViewGroup calculationFormulaContent, SVG svg) {
@@ -168,23 +190,4 @@ public class CalculationFragment extends Fragment {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        // TODO FILL
-    }
-
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-        ViewGroup calculationFormulaContent = (ViewGroup)  getView().findViewById(R.id.calculation_formula_content);
-
-        ImageView imageView = new ImageView(getActivity());
-
-        SVG svg = SVGParser.getSVGFromString(RAW_SVG);
-        resizeSvgToMatchParent(calculationFormulaContent, svg);
-        imageView.setImageDrawable(svg.createPictureDrawable());
-        imageView.setLayoutParams(defaultLayoutParams);
-        calculationFormulaContent.addView(imageView);
-    }
 }

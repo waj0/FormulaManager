@@ -35,7 +35,7 @@
 //        Formula ret = new Formula();
 //        ret.setId(cursor.getLong(cursor.getColumnIndex(FormulaSQLHelper.Formulas._ID)));
 //        ret.setName(cursor.getString(cursor.getColumnIndex(FormulaSQLHelper.Formulas.NAME)));
-//        ret.setRawFormula(cursor.getString(cursor.getColumnIndex(FormulaSQLHelper.Formulas.RAWFORMULA)));
+//        ret.setRawFormula(cursor.getString(cursor.getColumnIndex(FormulaSQLHelper.Formulas.RAW_FORMULA)));
 //        ret.setCategory(cursor.getString(cursor.getColumnIndex(FormulaSQLHelper.Formulas.CATEGORY)));
 //        int fav = cursor.getInt(cursor.getColumnIndex(FormulaSQLHelper.Formulas.FAVORITE));
 //        //Log.i(TAG, "favorite: " + fav);

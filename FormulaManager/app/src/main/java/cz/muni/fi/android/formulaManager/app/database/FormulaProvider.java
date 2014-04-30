@@ -226,7 +226,7 @@ public class FormulaProvider extends ContentProvider {
     private void checkColumns(String[] projection) {
         //TODO add formula columns here
         String[] available = { FormulaSQLHelper.Formulas._ID, FormulaSQLHelper.Formulas.NAME,
-                FormulaSQLHelper.Formulas.RAWFORMULA, FormulaSQLHelper.Formulas.CATEGORY,
+                FormulaSQLHelper.Formulas.RAW_FORMULA, FormulaSQLHelper.Formulas.SVG_FORMULA, FormulaSQLHelper.Formulas.CATEGORY,
                 FormulaSQLHelper.Formulas.FAVORITE};
         if (projection != null) {
             HashSet<String> requestedColumns = new HashSet<String>(Arrays.asList(projection));

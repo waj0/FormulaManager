@@ -1,4 +1,4 @@
-    package cz.muni.fi.android.formulaManager.app;
+package cz.muni.fi.android.formulaManager.app;
 
 import android.content.ContentValues;
 import android.os.Parcel;
@@ -9,7 +9,7 @@ import java.util.List;
 
 import cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper;
 
-    /**
+/**
  * Created by Majo on 9. 4. 2014.
  * Just example formula class, it is not used yet
  */
@@ -18,6 +18,9 @@ public class Formula implements Parcelable {
     private Long id;
     private String name;
     private String rawFormula;
+
+
+    private String svgFormula;
     private List<Parameter> params;
 
     private boolean favorite;
@@ -28,7 +31,12 @@ public class Formula implements Parcelable {
         ContentValues cv = new ContentValues();
         cv.put(FormulaSQLHelper.Formulas._ID, item.getId());
         cv.put(FormulaSQLHelper.Formulas.NAME, item.getName());
-        cv.put(FormulaSQLHelper.Formulas.RAWFORMULA, item.getRawFormula());
+        cv.put(FormulaSQLHelper.Formulas.RAW_FORMULA, item.getRawFormula());
+        if (item.getSvgFormula() == null) {
+            cv.putNull(FormulaSQLHelper.Formulas.SVG_FORMULA);
+        } else {
+            cv.put(FormulaSQLHelper.Formulas.SVG_FORMULA, item.getSvgFormula() == null);
+        }
         cv.put(FormulaSQLHelper.Formulas.CATEGORY, item.getCategory());
         cv.put(FormulaSQLHelper.Formulas.FAVORITE, item.isFavorite());
 
@@ -43,6 +51,7 @@ public class Formula implements Parcelable {
         this.id = parcel.readLong();
         this.name = parcel.readString();
         this.rawFormula = parcel.readString();
+        this.svgFormula = parcel.readString();
         params = parcel.readArrayList(getClass().getClassLoader());
         this.favorite = parcel.readByte() != 0;
         this.category = parcel.readString();
@@ -58,6 +67,7 @@ public class Formula implements Parcelable {
         parcel.writeLong(this.id);
         parcel.writeString(this.name);
         parcel.writeString(this.rawFormula);
+        parcel.writeString(this.svgFormula == null ? "" : this.svgFormula);
         parcel.writeList(params);
         parcel.writeByte((byte) (favorite ? 1 : 0));
         parcel.writeString(category);
@@ -105,6 +115,10 @@ public class Formula implements Parcelable {
         this.rawFormula = rawFormula;
     }
 
+    public String getSvgFormula() { return svgFormula; }
+
+    public void setSvgFormula(String svgFormula) { this.svgFormula = svgFormula; }
+
     public boolean isFavorite() {
         return favorite;
     }
@@ -123,14 +137,15 @@ public class Formula implements Parcelable {
 
     /**
      * Adds parameter to formula, if it exists, method will edit it
+     *
      * @param p parameter to be added/edited
      */
     public void addParam(Parameter p) {
-        if(p == null) {
+        if (p == null) {
             return;
         }
         int index = params.indexOf(p);
-        if (index > -1){
+        if (index > -1) {
             Parameter ex = params.get(index);
             ex.setName(p.getName());
             ex.setType(p.getType());
@@ -139,9 +154,9 @@ public class Formula implements Parcelable {
         }
     }
 
-    public String getParamsAsString(){
+    public String getParamsAsString() {
         String ret = "";
-        for(Parameter p : params) {
+        for (Parameter p : params) {
             ret = ret + p.getName() + "[" + p.getType() + "]\n";
         }
         return ret;

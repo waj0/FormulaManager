@@ -457,7 +457,8 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         c.moveToPosition(position);
         f.setId(c.getLong(c.getColumnIndex(FormulaSQLHelper.Formulas._ID)));
         f.setName(c.getString(c.getColumnIndex(FormulaSQLHelper.Formulas.NAME)));
-        f.setRawFormula(c.getString(c.getColumnIndex(FormulaSQLHelper.Formulas.RAWFORMULA)));
+        f.setRawFormula(c.getString(c.getColumnIndex(FormulaSQLHelper.Formulas.RAW_FORMULA)));
+        f.setSvgFormula(c.getString(c.getColumnIndex(FormulaSQLHelper.Formulas.SVG_FORMULA)));
         f.setCategory(c.getString(c.getColumnIndex(FormulaSQLHelper.Formulas.CATEGORY)));
         f.setFavorite(c.getInt(c.getColumnIndex(FormulaSQLHelper.Formulas.FAVORITE)) != 0);
         fetchParams(f);

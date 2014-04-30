@@ -40,7 +40,8 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
             "CREATE TABLE " + TABLE_FORMULAS + " (" +
                     Formulas._ID + " integer primary key autoincrement, " +
                     Formulas.NAME + " text not null unique, " +
-                    Formulas.RAWFORMULA + " text not null, " +
+                    Formulas.RAW_FORMULA + " text not null, " +
+                    Formulas.SVG_FORMULA + " text, " +
                     Formulas.CATEGORY + " text, " +
                     Formulas.FAVORITE + " integer, " +
                     " foreign key( " + Formulas.CATEGORY + " ) references " + TABLE_CATEGORIES +" ( " + Categories.NAME + " ) " +
@@ -133,11 +134,12 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
             //insert formula
             String formula = "INSERT INTO " + TABLE_FORMULAS +
                     " ( " + Formulas.NAME + ", " +
-                    Formulas.RAWFORMULA + ", " +
+                    Formulas.RAW_FORMULA + ", " +
+                    Formulas.SVG_FORMULA + ", " +
                     Formulas.CATEGORY + ", " +
                     Formulas.FAVORITE + " " +
                     ") values ( " +
-                    "'formula" + i + "', 'raw', '" + "category" + (i+3)%4 + "', " + i%2 +
+                    "'formula" + i + "', 'raw', 'svg', '" + "category" + (i+3)%4 + "', " + i%2 +
                     " );" ;
             sqLiteDatabase.execSQL(formula);
 
@@ -164,8 +166,13 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i2) {
-
+    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int newVersion, int oldVersion) {
+//
+//        sqLiteDatabase.execSQL("drop table if exists "+ TABLE_FORMULAS);
+//        sqLiteDatabase.execSQL("drop table if exists "+ TABLE_CATEGORIES);
+//        sqLiteDatabase.execSQL("drop table if exists "+ TABLE_VERSION);
+//        sqLiteDatabase.execSQL("drop table if exists "+ TABLE_PARAMETERS);
+//    onCreate(sqLiteDatabase);
     }
 
     //
@@ -175,9 +182,9 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
     interface FormulaColumns {
         //TODO add formula columns here
         String NAME = "name";
-        String RAWFORMULA = "rawFormula";
+        String RAW_FORMULA = "rawFormula";
         String CATEGORY = "category"; //TODO delete this column
-        //String SVGFORMULA = "svgFormula";
+        String SVG_FORMULA = "svgFormula";
         String FAVORITE = "favorite";
     }
 

@@ -1,9 +1,11 @@
 package cz.muni.fi.android.formulaManager.app.UI;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -113,13 +115,13 @@ public class CalculationFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        ViewGroup view = null;
+        View view = null;
         if(container!= null) {
-        view = (ViewGroup) container.findViewById(R.layout.calculation_layout);
+        view = (View) container.findViewById(R.layout.calculation_layout);
 
         }
         if(view == null) {
-            view = (ViewGroup) inflater.inflate(R.layout.calculation_layout, container,false);
+            view = (View) inflater.inflate(R.layout.calculation_layout, container,false);
         }
         TextView formulaName = (TextView) view.findViewById(R.id.calculation_formula_name);
         formulaName.setText(formula.getName());
@@ -128,32 +130,61 @@ public class CalculationFragment extends Fragment {
         CheckBox formulaFavourite = (CheckBox) view.findViewById(R.id.calculation_favorite);
         formulaFavourite.setChecked(formula.isFavorite());
 
-
-
-
+        ViewGroup calculationFormulaContent = (ViewGroup)  view.findViewById(R.id.calculation_formula_content);
 
         ImageView imageView = new ImageView(getActivity());
-//        Set the background color to white
-            imageView.setBackgroundColor(Color.CYAN);
 
         SVG svg = SVGParser.getSVGFromString(RAW_SVG);
-        // Get a drawable from the parsed SVG and set it as the drawable for the ImageView
+        resizeSvgToMatchParent(calculationFormulaContent, svg);
         imageView.setImageDrawable(svg.createPictureDrawable());
-
         imageView.setLayoutParams(defaultLayoutParams);
-        // Set the ImageView as the content view for the Activity
-
-        view.addView(imageView);
-
-
-
-
+        calculationFormulaContent.addView(imageView);
         return view;
+    }
+
+    private void resizeSvgToMatchParent(ViewGroup calculationFormulaContent, SVG svg) {
+        if( calculationFormulaContent.getWidth() == 0) {return;}
+        RectF limits = svg.getLimits();
+        float height = limits.height();
+        float width = limits.width();
+        float ratio = height/width;
+        float maxHeight = dipToPixels(300);
+        float maxWidth = calculationFormulaContent.getWidth();
+        int computedWidth;
+        int computedHeight;
+        if(maxHeight*ratio > maxWidth) {
+            computedHeight= (int) (maxWidth / ratio);
+            computedWidth= (int) maxWidth;
+        }
+        else {
+            computedHeight = (int) maxHeight;
+            computedWidth = (int) (maxHeight * ratio);
+        }
+        svg.resizePicture(computedHeight,computedWidth);
+    }
+
+    private float dipToPixels(float dipValue) {
+        DisplayMetrics metrics = getActivity().getBaseContext().getResources().getDisplayMetrics();
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         // TODO FILL
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        ViewGroup calculationFormulaContent = (ViewGroup)  getView().findViewById(R.id.calculation_formula_content);
+
+        ImageView imageView = new ImageView(getActivity());
+
+        SVG svg = SVGParser.getSVGFromString(RAW_SVG);
+        resizeSvgToMatchParent(calculationFormulaContent, svg);
+        imageView.setImageDrawable(svg.createPictureDrawable());
+        imageView.setLayoutParams(defaultLayoutParams);
+        calculationFormulaContent.addView(imageView);
     }
 }

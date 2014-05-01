@@ -143,13 +143,7 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
                     " );" ;
             sqLiteDatabase.execSQL(formula);
 
-            //get last id
-            Cursor c = sqLiteDatabase.rawQuery("SELECT last_insert_rowid()", null);
-            c.moveToFirst();
-            long lastId = c.getInt(0);
-            c.close();
-            c = null;
-            Log.i(TAG," last id = " + lastId);
+            long lastId = getLastID(sqLiteDatabase);
 
             //insert params
             for(int j = 0; j<i%10;j++ ) {
@@ -163,6 +157,18 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
                 sqLiteDatabase.execSQL(param);
             }
         }
+    }
+
+    public long getLastID(SQLiteDatabase sqLiteDatabase) {
+
+        Cursor c = sqLiteDatabase.rawQuery("SELECT last_insert_rowid()", null);
+        c.moveToFirst();
+        long lastId = c.getInt(0);
+        c.close();
+        c = null;
+        Log.i(TAG," last id = " + lastId);
+
+        return lastId;
     }
 
     @Override

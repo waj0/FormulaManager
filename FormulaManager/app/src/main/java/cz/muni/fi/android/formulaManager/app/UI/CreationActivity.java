@@ -1,6 +1,8 @@
 package cz.muni.fi.android.formulaManager.app.UI;
 
 
+import android.app.ActionBar;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -8,9 +10,11 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.GridLayout;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
@@ -25,6 +29,7 @@ import java.util.List;
 import cz.muni.fi.android.formulaManager.app.Formula;
 import cz.muni.fi.android.formulaManager.app.Parameter;
 import cz.muni.fi.android.formulaManager.app.R;
+import cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper;
 
 
 /**
@@ -33,6 +38,8 @@ import cz.muni.fi.android.formulaManager.app.R;
 public class CreationActivity extends ActionBarActivity implements CreateParamDialog.CreateParamDialogListener {
 
     private static final String TAG = "cz.fi.android.formulamanager.CreationActivity";
+
+    private FormulaSQLHelper sqlHelper = new FormulaSQLHelper(this);
 
     private GridLayout paramGrid;
 
@@ -94,8 +101,16 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                newFormula.setName(((EditText) findViewById(R.id.formula_name)).getText().toString());
-                newFormula.setRawFormula(((EditText) findViewById(R.id.formulaText)).getText().toString());
+                String name = ((EditText) findViewById(R.id.formula_name)).getText().toString();
+                String rawFormula = ((EditText) findViewById(R.id.formulaText)).getText().toString();
+
+                if(name == null || rawFormula == null) {
+                    Toast.makeText(getApplicationContext(), "You need to fill name and formula!", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                newFormula.setName(name);
+                newFormula.setRawFormula(rawFormula);
 
                 if (getIntent().getBooleanExtra(FormulaListFragment.F_EDIT, false)) {
                     //TODO update formula and its params in DB. and somehow reset list in main activity
@@ -103,10 +118,61 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
                 //TODO add formula and its params to DB. and somehow reset list in main activity, set category to null if it is user own formula
                 //TODO put also params to DB and set them (to objects) proper id - see onDialogPositiveClick()
 
+                addFormulaToDatabase(newFormula);
+
                 //TODO display toast
+                sqlHelper.close();
                 CreationActivity.this.finish();
             }
         });
+    }
+
+    private void addParametersToDatabase(Formula formula) {
+
+        for(Parameter param : formula.getParams()) {
+            ContentValues values = new ContentValues();
+            Log.i(CreationActivity.TAG,param.getName() + " " + param.getType());
+            values.put(FormulaSQLHelper.Parameters.NAME,param.getName());
+            values.put(FormulaSQLHelper.Parameters.TYPE, param.getType().toString());
+
+            if(updateFormula()) {
+                Log.i(TAG,"Updating param ID: " + param.getId());
+                values.put(FormulaSQLHelper.Parameters.FORMULA_ID,param.getId());
+                sqlHelper.getWritableDatabase().update(FormulaSQLHelper.TABLE_PARAMETERS,values,
+                        FormulaSQLHelper.Parameters._ID + "=" + param.getId(),null);
+            } else {
+                Log.i(TAG,"Get last ID: " + getLastID());
+                values.put(FormulaSQLHelper.Parameters.FORMULA_ID,getLastID());
+                sqlHelper.getWritableDatabase().insert(FormulaSQLHelper.TABLE_PARAMETERS, null, values);
+            }
+
+        }
+    }
+
+    private void addFormulaToDatabase(Formula newFormula) {
+
+        ContentValues values = new ContentValues();
+
+        values.put(FormulaSQLHelper.Formulas.NAME, newFormula.getName());
+        values.put(FormulaSQLHelper.Formulas.RAW_FORMULA, newFormula.getRawFormula());
+
+        if(updateFormula()) {
+            Log.i(TAG,"Formula ID: " + newFormula.getId());
+            sqlHelper.getWritableDatabase().update(FormulaSQLHelper.TABLE_FORMULAS,values,
+                    FormulaSQLHelper.Formulas._ID + "=" + newFormula.getId(),null);
+        } else {
+            sqlHelper.getWritableDatabase().insert(FormulaSQLHelper.TABLE_FORMULAS, null, values);
+        }
+
+        addParametersToDatabase(newFormula);
+    }
+
+    private boolean updateFormula() {
+        return getIntent().getBooleanExtra(FormulaListFragment.F_EDIT, false);
+    }
+
+    private long getLastID() {
+        return sqlHelper.getLastID(sqlHelper.getWritableDatabase());
     }
 
     @Override
@@ -175,6 +241,7 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
         Parameter p = new Parameter();
         //set temporary id to parameter TODO replace it with id from DB later
         p.setId(((long) newFormula.getParams().size()));
+        Log.i(CreationActivity.TAG,cpDialog.getSelectedType().toString());
         p.setType(cpDialog.getSelectedType());
         p.setName(cpDialog.getParamName());
 
@@ -195,6 +262,7 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
         Button b = new Button(this);
         b.setText(p.getName());
         int index = paramGrid.getChildCount() - 1;
+        b.setLayoutParams(new ActionBar.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         paramGrid.addView(b, index);
     }
 

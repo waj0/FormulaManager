@@ -55,6 +55,9 @@ public class CreateParamDialog extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View dialog  = inflater.inflate(R.layout.create_param_dialog, null);
         final EditText name = (EditText) dialog.findViewById(R.id.param_name);
+
+        setSelectedType(Parameter.ParameterType.REGULAR);
+
         RadioButton r = (RadioButton) dialog.findViewById(R.id.radioButton1);
         r.setOnClickListener(new View.OnClickListener() {
             @Override

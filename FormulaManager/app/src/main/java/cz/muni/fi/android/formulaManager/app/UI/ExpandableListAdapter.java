@@ -1,6 +1,9 @@
 package cz.muni.fi.android.formulaManager.app.UI;
 
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Typeface;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
@@ -9,17 +12,19 @@ import android.widget.TextView;
 import java.util.HashMap;
 import java.util.List;
 
+import cz.muni.fi.android.formulaManager.app.R;
+
 /**
  * Created by Martin on 26. 4. 2014.
  */
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
-    private Context context;
+    private Activity context;
     private List<String> functionGroups; // header titles
     // child data in format of header title, child title
     private HashMap<String, List<String>> functions;
 
-    public ExpandableListAdapter(Context context, List<String> listDataHeader,
+    public ExpandableListAdapter(Activity context, List<String> listDataHeader,
                                  HashMap<String, List<String>> listChildData) {
         this.context = context;
         this.functionGroups = listDataHeader;
@@ -41,22 +46,17 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
 
+        LayoutInflater inflater = context.getLayoutInflater();
         final String childText = (String) getChild(groupPosition, childPosition);
 
         if (convertView == null) {
-            convertView = new TextView(context);
+            convertView = inflater.inflate(R.layout.child_item, null);
         }
-        TextView text = (TextView) convertView;
-        text.setText(childText);
-//		convertView.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				Toast.makeText(activity, tempChild.get(childPosition),
-//						Toast.LENGTH_SHORT).show();
-//			}
-//		});
-        return convertView;
 
+        TextView item = (TextView) convertView.findViewById(R.id.function);
+        item.setText(childText);
+
+        return convertView;
     }
 
     @Override
@@ -87,12 +87,15 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         String headerTitle = (String) getGroup(groupPosition);
 
         if (convertView == null) {
-            convertView = new TextView(context);
+            LayoutInflater infalInflater = (LayoutInflater) context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = infalInflater.inflate(R.layout.group_item,
+                    null);
         }
 
-        ((TextView) convertView).setText(headerTitle);
-        convertView.setTag(headerTitle);
-
+        TextView item = (TextView) convertView.findViewById(R.id.function);
+        item.setTypeface(null, Typeface.BOLD);
+        item.setText(headerTitle);
         return convertView;
     }
 

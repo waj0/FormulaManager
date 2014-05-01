@@ -64,7 +64,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
     private boolean[] mCurCategoryFilter;
     String mCurNameFilter = null;
 
-    private CheckedListender mFavOnCheckedChangeListener = new CheckedListender();
+    private CheckedListener mFavOnCheckedChangeListener = new CheckedListener();
 
     private SimpleCursorAdapter mAdapter;
     private EnhancedListView mListView;
@@ -128,7 +128,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             cats.moveToNext();
         }
 
-        mDrawerLayout = (DrawerLayout) inflater.inflate(R.layout.formula_list_layout, container);
+        mDrawerLayout = (DrawerLayout) inflater.inflate(R.layout.formula_list_layout, container, false);
         return mDrawerLayout;
     }
 
@@ -361,8 +361,9 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         // fragment directly in the containing UI. //TODO share button problem
         View detailsFrame = getActivity().findViewById(R.id.details);
         mDualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
-        if (!mDualPane) {
-            menu.removeItem(R.id.action_share);
+        if (mDualPane) {
+            //menu.removeItem(R.id.action_share);
+            inflater.inflate(R.menu.calculation, menu);
         }
     }
 
@@ -384,6 +385,9 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
                 startActivity(intent);
                 return true;
             }
+            case R.id.action_share:
+                //TODO do stuff to share
+                Log.i(TAG, "share this now");
         }
         return super.onOptionsItemSelected(item);
     }
@@ -491,13 +495,16 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         StringBuilder selection = new StringBuilder();
         String[] selectionArgs = null;
         String and = " and ";
+        String or = " and ";
         if (mCurNameFilter != null) {
             //searching for names - via SearchView
             //TODO maybe use fulltext search fts3
             selection.append(FormulaSQLHelper.Formulas.NAME + " LIKE ?");
             selectionArgs = new String[]{"%" + mCurNameFilter + "%"};
         }
+
         if(mCurCategoryFilter[0]){
+            //show only favorites
             if(selection.length() != 0) {
                 selection.append(and);
             }
@@ -524,8 +531,14 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             }
             chosenCategories.append(") ");
 
+            selection.append(" ( ");
             selection.append(FormulaSQLHelper.Formulas.CATEGORY + " IN ");
             selection.append(chosenCategories.toString());
+            selection.append(or);
+            selection.append(FormulaSQLHelper.Formulas.CATEGORY + " IS NULL ");
+            selection.append(or);
+            selection.append(FormulaSQLHelper.Formulas.CATEGORY + " = '' ");
+            selection.append(" ) ");
         }
 
         // Now create and return a CursorLoader that will take care of
@@ -557,7 +570,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         mAdapter.swapCursor(null);
     }
 
-    private class CheckedListender implements CompoundButton.OnCheckedChangeListener{
+    private class CheckedListener implements CompoundButton.OnCheckedChangeListener{
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean newState) {
             Log.i(TAG, "" + buttonView.getTag());

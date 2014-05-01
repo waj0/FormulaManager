@@ -1,5 +1,6 @@
 package cz.muni.fi.android.formulaManager.app.UI;
 
+
 import android.graphics.Color;
 import android.graphics.RectF;
 import android.os.Bundle;
@@ -8,9 +9,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -92,34 +90,6 @@ public class CalculationFragment extends Fragment {
     }
 
     //TODO button to share is visible if only list is on screen - vertical list fragment - we should remove it somehow in calculation fragment lifecycle
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        //this fragment has menu items
-        setHasOptionsMenu(true);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        inflater.inflate(R.menu.calculation, menu);
-        //Log.i(TAG, "create menu calc fragment");
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        switch(item.getItemId()) {
-            case R.id.action_share:
-                //TODO do stuff to share
-                Log.i(TAG, "share this now");
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     public long getShownId() {
         return formula.getId();
@@ -227,5 +197,4 @@ public class CalculationFragment extends Fragment {
         DisplayMetrics metrics = getActivity().getBaseContext().getResources().getDisplayMetrics();
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
     }
-
 }

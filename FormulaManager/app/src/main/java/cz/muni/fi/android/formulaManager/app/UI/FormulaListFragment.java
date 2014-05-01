@@ -495,7 +495,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         StringBuilder selection = new StringBuilder();
         String[] selectionArgs = null;
         String and = " and ";
-        String or = " and ";
+        String or = " or ";
         if (mCurNameFilter != null) {
             //searching for names - via SearchView
             //TODO maybe use fulltext search fts3
@@ -540,6 +540,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             selection.append(FormulaSQLHelper.Formulas.CATEGORY + " = '' ");
             selection.append(" ) ");
         }
+        //Log.e(TAG, selection.toString());
 
         // Now create and return a CursorLoader that will take care of
         // creating a Cursor for the data being displayed.

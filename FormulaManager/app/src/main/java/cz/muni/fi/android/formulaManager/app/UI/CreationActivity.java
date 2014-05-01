@@ -4,6 +4,8 @@ package cz.muni.fi.android.formulaManager.app.UI;
 import android.app.ActionBar;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.DialogFragment;
@@ -137,25 +139,32 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
             values.put(FormulaSQLHelper.Parameters.NAME,param.getName());
             values.put(FormulaSQLHelper.Parameters.TYPE, param.getType().toString());
 
+            values.put(FormulaSQLHelper.Parameters.FORMULA_ID,formula.getId());
+
             if(existParameterInDB(param)) {
                 Log.i(TAG,"Update param: " + formula.getId());
-                values.put(FormulaSQLHelper.Parameters.FORMULA_ID,formula.getId());
-                sqlHelper.getWritableDatabase().update(FormulaSQLHelper.TABLE_PARAMETERS,values,
-                        FormulaSQLHelper.Parameters._ID + "=" + param.getId(),null);
+                //values.put(FormulaSQLHelper.Parameters.FORMULA_ID,formula.getId());
+                //sqlHelper.getWritableDatabase().update(FormulaSQLHelper.TABLE_PARAMETERS,values,
+                //        FormulaSQLHelper.Parameters._ID + "=" + param.getId(),null);
+                int rows = getContentResolver().update(FormulaSQLHelper.Parameters.contentItemUri(param.getId()),values,null,null);
+
             } else if (updateFormula()) {
                 Log.i(TAG,"Insert param exist formula: " + lastInsertedFormulaID);
-                values.put(FormulaSQLHelper.Parameters.FORMULA_ID,formula.getId());
-                sqlHelper.getWritableDatabase().insert(FormulaSQLHelper.TABLE_PARAMETERS, null, values);
+//                values.put(FormulaSQLHelper.Parameters.FORMULA_ID,formula.getId());
+//                sqlHelper.getWritableDatabase().insert(FormulaSQLHelper.TABLE_PARAMETERS, null, values);
+                Uri uri = getContentResolver().insert(FormulaSQLHelper.Parameters.contentUri(),values);
             } else {
                 Log.i(TAG,"Insert param dont exists formula: " + newFormula.getId());
-                values.put(FormulaSQLHelper.Parameters.FORMULA_ID,lastInsertedFormulaID);
-                sqlHelper.getWritableDatabase().insert(FormulaSQLHelper.TABLE_PARAMETERS, null, values);
+//                values.put(FormulaSQLHelper.Parameters.FORMULA_ID,lastInsertedFormulaID);
+//                sqlHelper.getWritableDatabase().insert(FormulaSQLHelper.TABLE_PARAMETERS, null, values);
+                Uri uri = getContentResolver().insert(FormulaSQLHelper.Parameters.contentUri(),values);
             }
         }
     }
 
     private boolean existParameterInDB(Parameter param) {
-        return param.getId() == null ? false : true;
+        //if parameter is not in DB it has negative ID
+        return param.getId() <= 0 ? false : true;
     }
 
     private void addFormulaToDatabase(Formula newFormula) {
@@ -167,10 +176,19 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
 
         if(updateFormula()) {
             Log.i(TAG,"Formula ID: " + newFormula.getId());
-            sqlHelper.getWritableDatabase().update(FormulaSQLHelper.TABLE_FORMULAS,values,
-                    FormulaSQLHelper.Formulas._ID + "=" + newFormula.getId(),null);
+            //sqlHelper.getWritableDatabase().update(FormulaSQLHelper.TABLE_FORMULAS,values,
+            //        FormulaSQLHelper.Formulas._ID + "=" + newFormula.getId(),null);
+            int rows = getContentResolver().update(FormulaSQLHelper.Formulas.contentItemUri(newFormula.getId()), Formula.getValues(newFormula), null, null);
         } else {
-            sqlHelper.getWritableDatabase().insert(FormulaSQLHelper.TABLE_FORMULAS, null, values);
+            //sqlHelper.getWritableDatabase().insert(FormulaSQLHelper.TABLE_FORMULAS, null, values);
+
+            //returned uri contains new id
+            Uri uri = getContentResolver().insert(FormulaSQLHelper.Formulas.contentUri(), Formula.getValues(newFormula));
+            Cursor c = getContentResolver().query(uri,null,null,null,null);
+            c.moveToFirst();
+            long newId = c.getLong(c.getColumnIndex(FormulaSQLHelper.Formulas._ID));
+            newFormula.setId(newId);
+
         }
 
         addParametersToDatabase(newFormula);
@@ -249,7 +267,7 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
 
         Parameter p = new Parameter();
         //set temporary id to parameter TODO replace it with id from DB later
-        p.setId(((long) newFormula.getParams().size()));
+        p.setId(((long) newFormula.getParams().size() * (-1)));
         Log.i(CreationActivity.TAG, cpDialog.getSelectedType().toString());
         p.setType(cpDialog.getSelectedType());
         p.setName(cpDialog.getParamName());

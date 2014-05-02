@@ -1,12 +1,17 @@
 package cz.muni.fi.android.formulaManager.app.UI;
 
 
+import android.animation.AnimatorSet;
+import android.animation.LayoutTransition;
+import android.animation.ObjectAnimator;
+import android.app.ActivityOptions;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
@@ -41,7 +46,6 @@ import cz.muni.fi.android.formulaManager.app.R;
 import cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper;
 import de.timroes.android.listview.EnhancedListView;
 
-//import cz.muni.fi.android.formulaManager.app.FormulaAdapter;
 
 
 /**
@@ -80,9 +84,8 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
-        Cursor c = getActivity().getContentResolver().query(FormulaSQLHelper.Formulas.contentUri(), null, null, null, null);
-        //mAdapter = new FormulaAdapter(getActivity(),c, true);
-
+        Cursor c = getActivity().getContentResolver().query(FormulaSQLHelper.Formulas.contentUri(),
+                null, null, null, null);
 
         mAdapter = new SimpleCursorAdapter(getActivity(), R.layout.row_layout, c,
                 new String[] { FormulaSQLHelper.Formulas.NAME, FormulaSQLHelper.Formulas.CATEGORY, FormulaSQLHelper.Formulas.FAVORITE},
@@ -176,12 +179,10 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             drawerRow.setLayoutParams(mlpRow);
             drawerRow.setOrientation(LinearLayout.HORIZONTAL);
 
-
             TextView text = new TextView(getActivity());
             text.setText(categoryNames[i]);
             text.setLayoutParams(lptext);
             drawerRow.addView(text);
-
 
             CheckBox category = new CheckBox(getActivity());
             category.setChecked(fill);
@@ -194,6 +195,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
                 }
             });
             drawerRow.addView(category);
+
             drawerList.addView(drawerRow);
         }
 
@@ -246,10 +248,17 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
                 //put true so creation activity edit existing formula
                 intent.putExtra(F_EDIT, true);
 
-                //set animation
-                //Bundle scaleBundle = ActivityOptions.makeScaleUpAnimation(view,0,0,view.getWidth(), view.getHeight()).toBundle();
 
-                startActivity(intent/*, scaleBundle*/);
+                int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+                if(currentapiVersion >= Build.VERSION_CODES.JELLY_BEAN) {
+                    //set animation
+                    ActivityOptions options = ActivityOptions.makeScaleUpAnimation(view, 0,
+                            0, view.getWidth(), view.getHeight());
+                    getActivity().startActivity(intent, options.toBundle());
+                } else {
+                    startActivity(intent);
+                }
+
                 return true;
             }
         });
@@ -349,6 +358,22 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         MenuItem search = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView)search.getActionView();
 
+        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+        if(currentapiVersion >= Build.VERSION_CODES.JELLY_BEAN) {
+            //Get the ID for the search bar LinearLayout
+            int searchBarId = searchView.getContext().getResources().getIdentifier("android:id/search_bar", null, null);
+            //Get the search bar Linearlayout
+            LinearLayout searchBar = (LinearLayout) searchView.findViewById(searchBarId);
+
+            LayoutTransition transition = new LayoutTransition();
+            AnimatorSet animAppear = new AnimatorSet();
+            animAppear.setDuration(300).playTogether(
+                    ObjectAnimator.ofFloat(searchBar, "alpha", 0, 1),
+                    ObjectAnimator.ofFloat(searchBar, "scaleY", 0, 1));
+            transition.setAnimator(LayoutTransition.APPEARING, animAppear);
+            searchBar.setLayoutTransition(transition);
+        }
+
         searchView.setOnQueryTextListener(this);
 
         // backwards compatible listeners to reset list after search widget was closed
@@ -392,7 +417,17 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
                 Intent intent = new Intent(getActivity(), CreationActivity.class);
                 //put false so creation activity create new formula
                 intent.putExtra(FormulaListFragment.F_EDIT, false);
-                startActivity(intent);
+
+                int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+                if(currentapiVersion >= Build.VERSION_CODES.JELLY_BEAN) {
+                    //set animation
+                    View button = getActivity().findViewById(R.id.action_new);
+                    ActivityOptions options = ActivityOptions.makeScaleUpAnimation(button, 0,
+                            0, button.getWidth(), button.getHeight());
+                    getActivity().startActivity(intent, options.toBundle());
+                } else {
+                    startActivity(intent);
+                }
                 return true;
             }
             case R.id.action_share:
@@ -450,8 +485,9 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
                 // Execute a transaction, replacing any existing fragment
                 // with this one inside the frame.
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.replace(R.id.details, details);
+                ft.setCustomAnimations(R.anim.pick_from_list, R.anim.slide_out);
 
+                ft.replace(R.id.details, details);
                 ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                 ft.commit();
             }
@@ -465,33 +501,47 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         }
     }
 
+    /**
+     * get formula from listview at specific position
+     * @param position position in listview
+     * @return
+     */
     private Formula getFormula(int position) {
         Formula f = new Formula();
         Cursor c = mAdapter.getCursor();
         c.moveToPosition(position);
+
         f.setId(c.getLong(c.getColumnIndex(FormulaSQLHelper.Formulas._ID)));
         f.setName(c.getString(c.getColumnIndex(FormulaSQLHelper.Formulas.NAME)));
         f.setRawFormula(c.getString(c.getColumnIndex(FormulaSQLHelper.Formulas.RAW_FORMULA)));
         f.setSvgFormula(c.getString(c.getColumnIndex(FormulaSQLHelper.Formulas.SVG_FORMULA)));
         f.setCategory(c.getString(c.getColumnIndex(FormulaSQLHelper.Formulas.CATEGORY)));
         f.setFavorite(c.getInt(c.getColumnIndex(FormulaSQLHelper.Formulas.FAVORITE)) != 0);
+
         fetchParams(f);
+
         return f;
     }
 
+
+    /**
+     * fetch parameters of formula from database
+     * @param f
+     */
     private void fetchParams(Formula f){
         Cursor c = getActivity().getContentResolver().query(
-                FormulaSQLHelper.Parameters.contentUri(),
-                null,
-                FormulaSQLHelper.Parameters.FORMULA_ID + " = " + f.getId(),
-                null,null);
+                FormulaSQLHelper.Parameters.contentItemUri(f.getId()),
+                null,null,null,null);
         c.moveToFirst();
+
         while (!c.isAfterLast())  {
             Parameter p = new Parameter();
             p.setId(c.getLong(c.getColumnIndex(FormulaSQLHelper.Parameters._ID)));
             p.setName(c.getString(c.getColumnIndex(FormulaSQLHelper.Parameters.NAME)));
             p.setType(Parameter.ParameterType.fromIntValue(c.getInt(c.getColumnIndex(FormulaSQLHelper.Parameters.TYPE))));
+
             f.getParams().add(p);
+
             c.moveToNext();
         }
     }
@@ -554,7 +604,6 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
 
         // Now create and return a CursorLoader that will take care of
         // creating a Cursor for the data being displayed.
-        //Log.i(TAG, selection.toString());
         return new CursorLoader(getActivity(), FormulaSQLHelper.Formulas.contentUri(), null, selection.toString(), selectionArgs, null);
     }
 

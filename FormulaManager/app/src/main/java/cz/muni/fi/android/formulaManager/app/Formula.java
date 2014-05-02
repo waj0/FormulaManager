@@ -27,7 +27,6 @@ public class Formula implements Parcelable {
     private String category;
 
     public static ContentValues getValues(Formula item) {
-        //TODO if putting formula to DB, dont forget to also put params there
         ContentValues cv = new ContentValues();
         cv.put(FormulaSQLHelper.Formulas._ID, item.getId());
         cv.put(FormulaSQLHelper.Formulas.NAME, item.getName());

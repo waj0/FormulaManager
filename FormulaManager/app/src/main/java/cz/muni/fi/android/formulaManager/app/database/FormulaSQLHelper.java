@@ -189,7 +189,7 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
         //TODO add formula columns here
         String NAME = "name";
         String RAW_FORMULA = "rawFormula";
-        String CATEGORY = "category"; //TODO delete this column
+        String CATEGORY = "category";
         String SVG_FORMULA = "svgFormula";
         String FAVORITE = "favorite";
     }

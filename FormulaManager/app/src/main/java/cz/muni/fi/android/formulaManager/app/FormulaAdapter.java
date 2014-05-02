@@ -20,7 +20,6 @@
 //
 //    LayoutInflater inflater;
 //
-//    //TODO favorites changes
 //
 //    public FormulaAdapter(Context context, Cursor c, boolean autoRequery) {
 //        super(context, c, autoRequery);

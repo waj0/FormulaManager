@@ -72,7 +72,7 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
                 }
 
                 if (existFormulaWithName(name) && !editFormula()) {
-                    Log.i(TAG,"Formula exist");
+                    Log.i(TAG, "Formula exist");
                     Toast.makeText(getApplicationContext(), "Formula with given name already exist. Please change the name of formula.", Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -151,7 +151,7 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
 
     private boolean existParameterInDB(Parameter param) {
 
-        if(param.getId() == null) {
+        if (param.getId() == null) {
             return false;
         }
 
@@ -202,7 +202,7 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
         addParam.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showNoticeDialog();
+                showNoticeDialog(null, -1);
             }
         });
 
@@ -220,27 +220,24 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.creation, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        return item.getItemId() == R.id.action_settings || super.onOptionsItemSelected(item);
     }
 
 
-    private void showNoticeDialog() {
-        // Create an instance of the dialog fragment and show it
+    private void showNoticeDialog(Parameter parameter, int index) {
         DialogFragment dialog = new CreateParamDialog();
+
+        Bundle arguments = new Bundle();
+        arguments.putParcelable("parameter", parameter);
+        arguments.putInt("buttonIndex", index);
+
+        dialog.setArguments(arguments);
         dialog.show(getSupportFragmentManager(), "CreateParamDialog");
     }
 
@@ -255,12 +252,20 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
         p.setType(cpDialog.getSelectedType());
         p.setName(cpDialog.getParamName());
 
-        if(existParameterInDB(p)) {
-            manager.editParameter(formula,p);
+        Parameter editedParameter = dialog.getArguments().getParcelable("parameter");
+
+        if (editedParameter != null) {
+            p.setId(editedParameter.getId());
+            manager.editParameter(formula, p);
+
+            Log.i(TAG, "Position of button: " + dialog.getArguments().getInt("buttonIndex"));
+            Button button = (Button) paramGrid.getChildAt(dialog.getArguments().getInt("buttonIndex"));
+            button.setText(p.getName());
+
         } else {
-            manager.addParameter(formula,p);
+            manager.addParameter(formula, p);
+            addParamButton(p);
         }
-        addParamButton(p);
     }
 
     @Override
@@ -268,7 +273,7 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
 
     }
 
-    private void addParamButton(Parameter p) {
+    private void addParamButton(final Parameter p) {
         if (p == null) {
             return;
         }
@@ -276,7 +281,16 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
         Button b = new Button(this);
         b.setText(p.getName());
 
-        int index = paramGrid.getChildCount() - 1;
+        final int index = paramGrid.getChildCount() - 1;
+
+        b.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showNoticeDialog(p, index);
+            }
+        });
+
+
         b.setLayoutParams(new ActionBar.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         paramGrid.addView(b, index);
     }

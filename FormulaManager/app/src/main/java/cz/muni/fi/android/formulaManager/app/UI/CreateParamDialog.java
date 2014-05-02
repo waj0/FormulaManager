@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioButton;
 
-import cz.muni.fi.android.formulaManager.app.Parameter;
+import cz.muni.fi.android.formulaManager.app.entity.Parameter;
 import cz.muni.fi.android.formulaManager.app.R;
 
 /**
@@ -54,9 +54,17 @@ public class CreateParamDialog extends DialogFragment {
         // Get the layout inflater
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View dialog  = inflater.inflate(R.layout.create_param_dialog, null);
-        final EditText name = (EditText) dialog.findViewById(R.id.param_name);
 
+        Bundle arguments = getArguments();
+        Parameter parameter = arguments.getParcelable("parameter");
+
+        final EditText name = (EditText) dialog.findViewById(R.id.param_name);
         setSelectedType(Parameter.ParameterType.REGULAR);
+
+        if(parameter != null) {
+            name.setText(parameter.getName());
+            setSelectedType(parameter.getType());
+        }
 
         RadioButton r = (RadioButton) dialog.findViewById(R.id.radioButton1);
         r.setOnClickListener(new View.OnClickListener() {

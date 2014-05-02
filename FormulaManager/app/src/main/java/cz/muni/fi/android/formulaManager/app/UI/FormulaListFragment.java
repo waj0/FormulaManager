@@ -40,8 +40,8 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
-import cz.muni.fi.android.formulaManager.app.Formula;
-import cz.muni.fi.android.formulaManager.app.Parameter;
+import cz.muni.fi.android.formulaManager.app.entity.Formula;
+import cz.muni.fi.android.formulaManager.app.entity.Parameter;
 import cz.muni.fi.android.formulaManager.app.R;
 import cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper;
 import de.timroes.android.listview.EnhancedListView;

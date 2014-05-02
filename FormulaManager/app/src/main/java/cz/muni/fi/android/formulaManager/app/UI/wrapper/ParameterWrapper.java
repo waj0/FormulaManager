@@ -4,8 +4,6 @@ import android.text.InputType;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import cz.muni.fi.android.formulaManager.app.Parameter;
-
 /**
  * Created by Slavomír on 30.4.2014.
  */

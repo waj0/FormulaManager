@@ -1,4 +1,4 @@
-package cz.muni.fi.android.formulaManager.app;
+package cz.muni.fi.android.formulaManager.app.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;

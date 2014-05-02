@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,14 +20,12 @@ import com.larvalabs.svgandroid.SVG;
 import com.larvalabs.svgandroid.SVGParseException;
 import com.larvalabs.svgandroid.SVGParser;
 
-import org.matheclipse.core.eval.EvalUtilities;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import cz.muni.fi.android.formulaManager.app.Formula;
-import cz.muni.fi.android.formulaManager.app.Parameter;
+import cz.muni.fi.android.formulaManager.app.entity.Formula;
+import cz.muni.fi.android.formulaManager.app.entity.Parameter;
 import cz.muni.fi.android.formulaManager.app.R;
 import cz.muni.fi.android.formulaManager.app.UI.wrapper.ParameterWrapper;
 import cz.muni.fi.android.formulaManager.app.UI.wrapper.RegularParameterWrapper;

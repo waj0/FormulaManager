@@ -8,7 +8,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import cz.muni.fi.android.formulaManager.app.Formula;
+import cz.muni.fi.android.formulaManager.app.entity.Formula;
 import cz.muni.fi.android.formulaManager.app.R;
 
 

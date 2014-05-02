@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioButton;
 
-import cz.muni.fi.android.formulaManager.app.Parameter;
+import cz.muni.fi.android.formulaManager.app.entity.Parameter;
 import cz.muni.fi.android.formulaManager.app.R;
 
 /**

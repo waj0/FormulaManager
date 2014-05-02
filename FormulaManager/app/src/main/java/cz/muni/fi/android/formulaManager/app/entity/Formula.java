@@ -1,4 +1,4 @@
-package cz.muni.fi.android.formulaManager.app;
+package cz.muni.fi.android.formulaManager.app.entity;
 
 import android.content.ContentValues;
 import android.os.Parcel;
@@ -11,7 +11,7 @@ import cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper;
 
 /**
  * Created by Majo on 9. 4. 2014.
- * Just example formula class, it is not used yet
+ *
  */
 public class Formula implements Parcelable {
 
@@ -136,30 +136,4 @@ public class Formula implements Parcelable {
         this.category = category;
     }
 
-    /**
-     * Adds parameter to formula, if it exists, method will edit it
-     *
-     * @param p parameter to be added/edited
-     */
-    public void addParam(Parameter p) {
-        if (p == null) {
-            return;
-        }
-        int index = params.indexOf(p);
-        if (index > -1) {
-            Parameter ex = params.get(index);
-            ex.setName(p.getName());
-            ex.setType(p.getType());
-        } else {
-            params.add(p);
-        }
-    }
-
-    public String getParamsAsString() {
-        String ret = "";
-        for (Parameter p : params) {
-            ret = ret + p.getName() + "[" + p.getType() + "]\n";
-        }
-        return ret;
-    }
 }

@@ -26,10 +26,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import cz.muni.fi.android.formulaManager.app.Formula;
-import cz.muni.fi.android.formulaManager.app.Parameter;
+import cz.muni.fi.android.formulaManager.app.entity.Formula;
+import cz.muni.fi.android.formulaManager.app.entity.Parameter;
 import cz.muni.fi.android.formulaManager.app.R;
 import cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper;
+import cz.muni.fi.android.formulaManager.app.manager.FormulaManager;
+import cz.muni.fi.android.formulaManager.app.manager.FormulaManagerImpl;
 
 
 /**
@@ -46,7 +48,7 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
     List<String> functionGroups = new ArrayList<String>();
     HashMap<String, List<String>> functionItems = new HashMap<String, List<String>>();
 
-    private Formula newFormula;
+    private Formula formula;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +58,7 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
         prepareListData();
         initNavigationDrawer();
 
-        newFormula = new Formula();
+        formula = new Formula();
         Button save = (Button) findViewById(R.id.save_button);
         save.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,14 +71,14 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
                     return;
                 }
 
-                if (existFormulaWithName(name)) {
+                if (existFormulaWithName(name) && !editFormula()) {
                     Log.i(TAG,"Formula exist");
                     Toast.makeText(getApplicationContext(), "Formula with given name already exist. Please change the name of formula.", Toast.LENGTH_LONG).show();
                     return;
                 }
 
-                newFormula.setName(name);
-                newFormula.setRawFormula(rawFormula);
+                formula.setName(name);
+                formula.setRawFormula(rawFormula);
 
                 addFormulaToDatabase();
 
@@ -125,12 +127,12 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
 
     private void addParametersToDatabase() {
 
-        for (Parameter param : newFormula.getParams()) {
+        for (Parameter param : formula.getParams()) {
             ContentValues values = new ContentValues();
 
             values.put(FormulaSQLHelper.Parameters.NAME, param.getName());
             values.put(FormulaSQLHelper.Parameters.TYPE, param.getType().toString());
-            values.put(FormulaSQLHelper.Parameters.FORMULA_ID, newFormula.getId());
+            values.put(FormulaSQLHelper.Parameters.FORMULA_ID, formula.getId());
 
             if (existParameterInDB(param)) {
                 getContentResolver().update(FormulaSQLHelper.Parameters.contentItemUri(param.getId()), values, null, null);
@@ -148,18 +150,26 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
     }
 
     private boolean existParameterInDB(Parameter param) {
-        return param.getId() <= 0 ? false : true;
+
+        if(param.getId() == null) {
+            return false;
+        }
+
+        Cursor c = getContentResolver().
+                query(FormulaSQLHelper.Parameters.contentItemUri(param.getId()), null, null, null, null);
+
+        return c.getCount() == 0 ? false : true;
     }
 
     private void addFormulaToDatabase() {
 
         ContentValues values = new ContentValues();
 
-        values.put(FormulaSQLHelper.Formulas.NAME, newFormula.getName());
-        values.put(FormulaSQLHelper.Formulas.RAW_FORMULA, newFormula.getRawFormula());
+        values.put(FormulaSQLHelper.Formulas.NAME, formula.getName());
+        values.put(FormulaSQLHelper.Formulas.RAW_FORMULA, formula.getRawFormula());
 
         if (editFormula()) {
-            getContentResolver().update(FormulaSQLHelper.Formulas.contentItemUri(newFormula.getId()), Formula.getValues(newFormula), null, null);
+            getContentResolver().update(FormulaSQLHelper.Formulas.contentItemUri(formula.getId()), Formula.getValues(formula), null, null);
         } else {
             insertFormulaToDB();
         }
@@ -168,11 +178,11 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
     }
 
     private void insertFormulaToDB() {
-        Uri uri = getContentResolver().insert(FormulaSQLHelper.Formulas.contentUri(), Formula.getValues(newFormula));
+        Uri uri = getContentResolver().insert(FormulaSQLHelper.Formulas.contentUri(), Formula.getValues(formula));
         Cursor c = getContentResolver().query(uri, null, null, null, null);
         c.moveToFirst();
         long newId = c.getLong(c.getColumnIndex(FormulaSQLHelper.Formulas._ID));
-        newFormula.setId(newId);
+        formula.setId(newId);
     }
 
     private boolean editFormula() {
@@ -198,11 +208,11 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
 
         if (editFormula()) {
 
-            newFormula = getIntent().getParcelableExtra(FormulaListFragment.FORMULA);
+            formula = getIntent().getParcelableExtra(FormulaListFragment.FORMULA);
 
-            ((EditText) findViewById(R.id.formula_name)).setText(newFormula.getName());
-            ((EditText) findViewById(R.id.formulaText)).setText(newFormula.getRawFormula());
-            for (Parameter p : newFormula.getParams()) {
+            ((EditText) findViewById(R.id.formula_name)).setText(formula.getName());
+            ((EditText) findViewById(R.id.formulaText)).setText(formula.getRawFormula());
+            for (Parameter p : formula.getParams()) {
                 addParamButton(p);
             }
         }
@@ -239,14 +249,17 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
     public void onDialogPositiveClick(DialogFragment dialog) {
         CreateParamDialog cpDialog = (CreateParamDialog) dialog;
 
+        FormulaManager manager = new FormulaManagerImpl();
+
         Parameter p = new Parameter();
-        //set temporary id to parameter TODO replace it with id from DB later
-        p.setId(((long) newFormula.getParams().size() * (-1)));
-        Log.i(CreationActivity.TAG, cpDialog.getSelectedType().toString());
         p.setType(cpDialog.getSelectedType());
         p.setName(cpDialog.getParamName());
 
-        newFormula.addParam(p);
+        if(existParameterInDB(p)) {
+            manager.editParameter(formula,p);
+        } else {
+            manager.addParameter(formula,p);
+        }
         addParamButton(p);
     }
 
@@ -262,6 +275,7 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
         //TODO set onclick onlongclick listeners to this button , maybe put upper bound on width
         Button b = new Button(this);
         b.setText(p.getName());
+
         int index = paramGrid.getChildCount() - 1;
         b.setLayoutParams(new ActionBar.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         paramGrid.addView(b, index);

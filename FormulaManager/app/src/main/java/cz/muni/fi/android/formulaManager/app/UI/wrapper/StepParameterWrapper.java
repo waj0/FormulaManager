@@ -6,7 +6,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import cz.muni.fi.android.formulaManager.app.Parameter;
+import cz.muni.fi.android.formulaManager.app.entity.Parameter;
 
 /**
  * Created by Slavomír on 30.4.2014.

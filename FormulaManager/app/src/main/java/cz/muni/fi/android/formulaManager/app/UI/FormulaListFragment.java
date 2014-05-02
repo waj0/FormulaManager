@@ -2,7 +2,6 @@ package cz.muni.fi.android.formulaManager.app.UI;
 
 
 import android.content.ContentValues;
-import android.support.v4.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -12,6 +11,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
@@ -36,11 +36,12 @@ import android.widget.SearchView;
 import android.widget.TextView;
 
 import cz.muni.fi.android.formulaManager.app.Formula;
-//import cz.muni.fi.android.formulaManager.app.FormulaAdapter;
 import cz.muni.fi.android.formulaManager.app.Parameter;
 import cz.muni.fi.android.formulaManager.app.R;
 import cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper;
 import de.timroes.android.listview.EnhancedListView;
+
+//import cz.muni.fi.android.formulaManager.app.FormulaAdapter;
 
 
 /**
@@ -157,17 +158,34 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
 
         //add checkBox for every category to drawer
         LinearLayout drawerList = (LinearLayout) getActivity().findViewById(R.id.drawer_list);
-        ViewGroup.MarginLayoutParams mlp = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        mlp.setMargins(0,0,0,8);
+        LinearLayout.LayoutParams lptext = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lptext.setMargins(0,0,0,8);
+        lptext.weight = 1;
+        LinearLayout.LayoutParams lpbox = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lpbox.setMargins(0,0,0,8);
+
+        ViewGroup.MarginLayoutParams mlpRow = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        mlpRow.setMargins(0,0,0,8);
+
         for(int i = 0; i < categoriesCount; i++) {
             final int pos = i;
             boolean fill = (i!=0) ; //first should be false, others true
             mCurCategoryFilter[i] = fill;
 
+            LinearLayout drawerRow = new LinearLayout(getActivity());
+            drawerRow.setLayoutParams(mlpRow);
+            drawerRow.setOrientation(LinearLayout.HORIZONTAL);
+
+
+            TextView text = new TextView(getActivity());
+            text.setText(categoryNames[i]);
+            text.setLayoutParams(lptext);
+            drawerRow.addView(text);
+
+
             CheckBox category = new CheckBox(getActivity());
-            category.setText(categoryNames[i]);
             category.setChecked(fill);
-            category.setLayoutParams(mlp);
+            category.setLayoutParams(lpbox);
             category.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -175,7 +193,8 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
                     getActivity().getSupportLoaderManager().restartLoader(0, null, FormulaListFragment.this);
                 }
             });
-            drawerList.addView(category);
+            drawerRow.addView(category);
+            drawerList.addView(drawerRow);
         }
 
         //set drawer listeners
@@ -282,18 +301,9 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             // Make sure our UI is in the correct state.
             showDetails(mCurCheckPosition);
         } else {
-            mListView.setSwipeDirection(EnhancedListView.SwipeDirection.BOTH);
-            mListView.setChoiceMode(ListView.CHOICE_MODE_NONE);
+            mListView.setSwipeDirection(EnhancedListView.SwipeDirection.START);
             mListView.clearChoices();
-            /*for (int i = 0; i < mListView.getCount(); i++) //TODO selection problem
-                mListView.setItemChecked(i, false);
-            mListView.post(new Runnable() {
-                @Override
-                public void run() {
-                    mListView.setChoiceMode(ListView.CHOICE_MODE_NONE);
-                }
-            });
-            mAdapter.notifyDataSetChanged();*/
+            mListView.setChoiceMode(ListView.CHOICE_MODE_NONE);
         }
     }
 
@@ -386,8 +396,9 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
                 return true;
             }
             case R.id.action_share:
-                //TODO do stuff to share
+                //TODO do stuff to share, move to calc fragment
                 Log.i(TAG, "share this now");
+                facebookFeedDialog(getFormula(4));
         }
         return super.onOptionsItemSelected(item);
     }
@@ -447,7 +458,6 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         } else {
             // Otherwise we need to launch a new activity to display
             // the dialog fragment with selected text.
-            //TODO put stuff in intent for calculation activity, whole formula to intent
             Intent intent = new Intent();
             intent.setClass(getActivity(), CalculationActivity.class);
             intent.putExtra(FORMULA, getFormula(index));
@@ -581,5 +591,45 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             int rows = getActivity().getContentResolver().update(FormulaSQLHelper.Formulas.contentItemUri(id),cv,null,null);
             Log.i(TAG, "updated " + rows + " " + id);
         }
+    }
+
+
+    //TODO move to calc fragment
+    private void facebookFeedDialog(Formula badformula) {
+      /*  // Set the dialog parameters
+        Bundle params = new Bundle();
+       // params.putParcelable("formula", formula);
+        params.putString("name", "name");
+        params.putString("caption", "caps");
+        params.putString("description", "desc");
+        params.putString("link", "link");
+        params.putString("picture", "pic");
+
+        // Invoke the dialog
+        WebDialog feedDialog = (
+                new WebDialog.FeedDialogBuilder(getActivity(),
+                        Session.getActiveSession(),
+                        params))
+                .setOnCompleteListener(new WebDialog.OnCompleteListener() {
+                    @Override
+                    public void onComplete(Bundle values,
+                                           FacebookException error) {
+                        if (error == null) {
+                            // When the story is posted, echo the success
+                            // and the post Id.
+                            final String postId = values.getString("post_id");
+                            if (postId != null) {
+                                Toast.makeText(getActivity(),
+                                        "Story published: " + postId,
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+
+                })
+                .build();
+        feedDialog.show();*/
+
+
     }
 }

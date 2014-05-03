@@ -530,8 +530,8 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
      */
     private void fetchParams(Formula f){
         Cursor c = getActivity().getContentResolver().query(
-                FormulaSQLHelper.Parameters.contentItemUri(f.getId()),
-                null,null,null,null);
+                FormulaSQLHelper.Parameters.contentUri(),
+                null,FormulaSQLHelper.Parameters.FORMULA_ID +"=?",new String[] {f.getId().toString()},null);
         c.moveToFirst();
 
         while (!c.isAfterLast())  {

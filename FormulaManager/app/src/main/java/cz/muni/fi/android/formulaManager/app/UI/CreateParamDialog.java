@@ -6,13 +6,15 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 
-import cz.muni.fi.android.formulaManager.app.entity.Parameter;
 import cz.muni.fi.android.formulaManager.app.R;
+import cz.muni.fi.android.formulaManager.app.entity.Parameter;
 
 /**
  * Created by Majo on 13. 4. 2014.
@@ -21,6 +23,7 @@ public class CreateParamDialog extends DialogFragment {
 
     public interface CreateParamDialogListener {
         public void onDialogPositiveClick(DialogFragment dialog);
+
         //TODO maybe we dont need negative method of this interface
         public void onDialogNegativeClick(DialogFragment dialog);
     }
@@ -53,7 +56,7 @@ public class CreateParamDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         // Get the layout inflater
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View dialog  = inflater.inflate(R.layout.create_param_dialog, null);
+        View dialog = inflater.inflate(R.layout.create_param_dialog, null);
 
         Bundle arguments = getArguments();
         Parameter parameter = arguments.getParcelable("parameter");
@@ -61,8 +64,22 @@ public class CreateParamDialog extends DialogFragment {
         final EditText name = (EditText) dialog.findViewById(R.id.param_name);
         setSelectedType(Parameter.ParameterType.REGULAR);
 
-        if(parameter != null) {
+        if (parameter != null) {
             name.setText(parameter.getName());
+            RadioGroup group = (RadioGroup) dialog.findViewById(R.id.radioGroup);
+            Log.i(CreateParamDialog.class.getName(), parameter.toString());
+
+            switch (parameter.getType()) {
+                case REGULAR:
+                    group.check(R.id.radioButton1);
+                    break;
+                case INDEX:
+                    group.check(R.id.radioButton2);
+                    break;
+                case STEP:
+                    group.check(R.id.radioButton3);
+                    break;
+            }
             setSelectedType(parameter.getType());
         }
 
@@ -87,23 +104,24 @@ public class CreateParamDialog extends DialogFragment {
                 setSelectedType(Parameter.ParameterType.STEP);
             }
         });
+
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
         builder.setView(dialog)
-               .setTitle(R.string.title_param_create)
-               .setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
-                   public void onClick(DialogInterface dialog, int id) {
-                       // Send the positive button event back to the host activity
-                       setParamName(name.getText().toString());
-                       mListener.onDialogPositiveClick(CreateParamDialog.this);
-                   }
-               })
-               .setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
-                   public void onClick(DialogInterface dialog, int id) {
-                       // Send the negative button event back to the host activity
-                       mListener.onDialogNegativeClick(CreateParamDialog.this);
-                   }
-               });
+                .setTitle(R.string.title_param_create)
+                .setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Send the positive button event back to the host activity
+                        setParamName(name.getText().toString());
+                        mListener.onDialogPositiveClick(CreateParamDialog.this);
+                    }
+                })
+                .setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Send the negative button event back to the host activity
+                        mListener.onDialogNegativeClick(CreateParamDialog.this);
+                    }
+                });
         return builder.create();
     }
 

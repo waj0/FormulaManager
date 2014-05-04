@@ -24,4 +24,12 @@ public interface FormulaManager {
      */
     public void editParameter(Formula formula, Parameter parameter);
 
+    /**
+     * Delete parameter from formula
+     *
+     * @param parameter parameter to be deleted
+     * @param formula formula to where parameter will be deleted
+     */
+    public void deleteParameter(Formula formula, Parameter parameter);
+
 }

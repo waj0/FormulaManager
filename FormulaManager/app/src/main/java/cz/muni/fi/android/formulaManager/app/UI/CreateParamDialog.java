@@ -66,21 +66,10 @@ public class CreateParamDialog extends DialogFragment {
 
         if (parameter != null) {
             name.setText(parameter.getName());
-            RadioGroup group = (RadioGroup) dialog.findViewById(R.id.radioGroup);
             Log.i(CreateParamDialog.class.getName(), parameter.toString());
-
-            switch (parameter.getType()) {
-                case REGULAR:
-                    group.check(R.id.radioButton1);
-                    break;
-                case INDEX:
-                    group.check(R.id.radioButton2);
-                    break;
-                case STEP:
-                    group.check(R.id.radioButton3);
-                    break;
-            }
             setSelectedType(parameter.getType());
+
+            setCheckedParameterType(parameter,dialog);
         }
 
         RadioButton r = (RadioButton) dialog.findViewById(R.id.radioButton1);
@@ -123,6 +112,21 @@ public class CreateParamDialog extends DialogFragment {
                     }
                 });
         return builder.create();
+    }
+
+    private void setCheckedParameterType(Parameter parameter, View dialog) {
+        RadioGroup group = (RadioGroup) dialog.findViewById(R.id.radioGroup);
+        switch (parameter.getType()) {
+            case REGULAR:
+                group.check(cz.muni.fi.android.formulaManager.app.R.id.radioButton1);
+                break;
+            case INDEX:
+                group.check(R.id.radioButton2);
+                break;
+            case STEP:
+                group.check(R.id.radioButton3);
+                break;
+        }
     }
 
     public String getParamName() {

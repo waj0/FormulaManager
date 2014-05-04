@@ -285,8 +285,8 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
         if (p == null) {
             return;
         }
-        //TODO set onclick onlongclick listeners to this button , maybe put upper bound on width
-        Button b = new Button(this);
+
+        final Button b = new Button(this);
         b.setText(p.getName());
 
         final int index = paramGrid.getChildCount() - 1;
@@ -299,14 +299,18 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
             }
         });
 
-        /*
+
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showNoticeDialog(p, index);
+                EditText rawFormula = (EditText) findViewById(R.id.formulaText);
+
+                int currentPositionInEditText = rawFormula.getSelectionStart();
+                String parameterName = b.getText().toString();
+                rawFormula.getText().insert(currentPositionInEditText,parameterName);
             }
         });
-        */
+
 
 
         b.setLayoutParams(new ActionBar.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));

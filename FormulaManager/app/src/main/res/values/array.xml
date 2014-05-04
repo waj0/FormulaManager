@@ -2,8 +2,12 @@
 <resources>
     <string-array name="function_groups">
         <item>Constants</item>
-        <item>Trigonometric Operators</item>
+        <item>Trigonometric Functions</item>
         <item>Relational Operators</item>
+        <item>Rounding</item>
+        <item>Analysis</item>
+        <item>General Functions</item>
+        <item>Divisor and Multiple</item>
     </string-array>
 
     <string-array name="constants">
@@ -16,7 +20,7 @@
         <item>Infinity</item>
     </string-array>
 
-    <string-array name="trigonometric_operators">
+    <string-array name="trigonometric_functions">
         <item>Sine</item>
         <item>Cosine</item>
         <item>Tangent</item>
@@ -35,6 +39,34 @@
         <item>Greater than or equal to</item>
         <item>Less than or equal to</item>
     </string-array>
+
+    <string-array name="rounding">
+        <item>Ceiling</item>
+        <item>Floor</item>
+        <item>Round</item>
+    </string-array>
+
+    <string-array name="analysis">
+        <item>Derivation</item>
+        <item>Integrate</item>
+        <item>Limit</item>
+    </string-array>
+
+    <string-array name="general_functions">
+        <item>Sum</item>
+        <item>Exponential function</item>
+        <item>Logarithm</item>
+        <item>Binomial</item>
+        <item>Absolute</item>
+        <item>Simplify</item>
+        <item>Factorial</item>
+    </string-array>
+
+    <string-array name="divisor_and_multiple">
+        <item>Great Common Divisor</item>
+        <item>Least Common Multiple</item>
+    </string-array>
+
 
 </resources>
 

@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import cz.muni.fi.android.formulaManager.app.entity.Formula;
+import cz.muni.fi.android.formulaManager.app.entity.Function;
+import cz.muni.fi.android.formulaManager.app.entity.FunctionHelper;
 import cz.muni.fi.android.formulaManager.app.entity.Parameter;
 import cz.muni.fi.android.formulaManager.app.R;
 import cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper;
@@ -99,27 +101,19 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
             }
         });
 
-        drawerList.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
-            @Override
-            public void onGroupExpand(int groupPosition) {
-                Toast.makeText(getApplicationContext(),
-                        functionGroups.get(groupPosition) + " Expanded",
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
-
         drawerList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView expandableListView, View view, int groupPosition, int childPosition, long id) {
-                Toast.makeText(
-                        getApplicationContext(),
-                        functionGroups.get(groupPosition)
-                                + " : "
-                                + functionItems.get(
-                                functionGroups.get(groupPosition)).get(
-                                childPosition), Toast.LENGTH_SHORT
-                )
-                        .show();
+
+                String functionName = functionItems.get(functionGroups.get(groupPosition)).get(childPosition);
+                FunctionHelper helper = Function.getFunction(functionName.toLowerCase());
+
+                if(helper.getToast() != null) {
+                    Toast.makeText(getApplicationContext(),helper.getToast(), Toast.LENGTH_LONG).show();
+                }
+
+                writeToRawFormulaEditText(helper.getFormulaForm());
+
                 return false;
             }
         });
@@ -249,8 +243,8 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         CreateParamDialog cpDialog = (CreateParamDialog) dialog;
-
         FormulaManager manager = new FormulaManagerImpl();
+        Parameter editedParameter = dialog.getArguments().getParcelable("parameter");
 
         Parameter p = new Parameter();
         p.setType(cpDialog.getSelectedType());
@@ -261,7 +255,10 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
             return;
         }
 
-        Parameter editedParameter = dialog.getArguments().getParcelable("parameter");
+        if(existParamNameForFormula(p.getName()) && editedParameter == null ) {
+            Toast.makeText(getApplicationContext(), "Parameter with given name already exists!", Toast.LENGTH_LONG).show();
+            return;
+        }
 
         if (editedParameter != null) {
             p.setId(editedParameter.getId());
@@ -274,6 +271,19 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
             manager.addParameter(formula, p);
             addParamButton(p);
         }
+    }
+
+    private boolean existParamNameForFormula(String name) {
+
+        List<Parameter> parameters = formula.getParams();
+
+        for(Parameter parameter : parameters) {
+            if(parameter.getName().equals(name)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
@@ -303,11 +313,8 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                EditText rawFormula = (EditText) findViewById(R.id.formulaText);
-
-                int currentPositionInEditText = rawFormula.getSelectionStart();
                 String parameterName = b.getText().toString();
-                rawFormula.getText().insert(currentPositionInEditText,parameterName);
+                writeToRawFormulaEditText(parameterName);
             }
         });
 
@@ -315,6 +322,13 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
 
         b.setLayoutParams(new ActionBar.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         paramGrid.addView(b, index);
+    }
+
+    private void writeToRawFormulaEditText(String text) {
+        EditText rawFormula = (EditText) findViewById(cz.muni.fi.android.formulaManager.app.R.id.formulaText);
+
+        int currentPositionInEditText = rawFormula.getSelectionStart();
+        rawFormula.getText().insert(currentPositionInEditText, text);
     }
 
     private void prepareListData() {
@@ -328,13 +342,26 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
         // Adding child data
         List<String> constants = new ArrayList<String>(
                 Arrays.asList(getResources().getStringArray(R.array.constants)));
-        List<String> goniometricalOperators = new ArrayList<String>(
-                Arrays.asList(getResources().getStringArray(R.array.trigonometric_operators)));
+        List<String> trigonometricFunctions = new ArrayList<String>(
+                Arrays.asList(getResources().getStringArray(R.array.trigonometric_functions)));
         List<String> relationalOperators = new ArrayList<String>(
                 Arrays.asList(getResources().getStringArray(R.array.relational_operators)));
+        List<String> rounding = new ArrayList<String>(
+                Arrays.asList(getResources().getStringArray(R.array.rounding)));
+        List<String> analysis = new ArrayList<String>(
+                Arrays.asList(getResources().getStringArray(R.array.analysis)));
+        List<String> generalFunctions = new ArrayList<String>(
+                Arrays.asList(getResources().getStringArray(R.array.general_functions)));
+        List<String> divisorAndMultiple = new ArrayList<String>(
+                Arrays.asList(getResources().getStringArray(R.array.divisor_and_multiple)));
+
 
         functionItems.put(functionGroups.get(0), constants);
-        functionItems.put(functionGroups.get(1), goniometricalOperators);
+        functionItems.put(functionGroups.get(1), trigonometricFunctions);
         functionItems.put(functionGroups.get(2), relationalOperators);
+        functionItems.put(functionGroups.get(3), rounding);
+        functionItems.put(functionGroups.get(4), analysis);
+        functionItems.put(functionGroups.get(5), generalFunctions);
+        functionItems.put(functionGroups.get(6), divisorAndMultiple);
     }
 }

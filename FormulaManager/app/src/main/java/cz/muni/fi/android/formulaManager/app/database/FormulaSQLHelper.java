@@ -130,7 +130,7 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
             sqLiteDatabase.execSQL(category);
         }
 
-        for (int i=0;i<100;i++){
+        for (int i=0;i<15;i++){
             //insert formula
             String formula = "INSERT INTO " + TABLE_FORMULAS +
                     " ( " + Formulas.NAME + ", " +
@@ -152,7 +152,7 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
                         Parameters.TYPE + ", " +
                         Parameters.FORMULA_ID + " " +
                         ") values ( " +
-                        "'par" + j + "', " + j%3 + ", " + lastId +
+                        "'par" + j + "', " + 1 + ", " + lastId +
                         " );" ;
                 sqLiteDatabase.execSQL(param);
             }

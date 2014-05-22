@@ -509,6 +509,9 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
     private Formula getFormula(int position) {
         Formula f = new Formula();
         Cursor c = mAdapter.getCursor();
+        if(c.getCount()==0) {
+            return null;
+        }
         c.moveToPosition(position);
 
         f.setId(c.getLong(c.getColumnIndex(FormulaSQLHelper.Formulas._ID)));

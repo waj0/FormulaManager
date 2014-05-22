@@ -1,24 +1,68 @@
 package cz.muni.fi.android.formulaManager.app.UI;
 
 
-import android.app.SearchManager;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.nfc.Tag;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import cz.muni.fi.android.formulaManager.app.R;
+import cz.muni.fi.android.formulaManager.app.service.Updater;
 
 public class MainActivity extends ActionBarActivity {
     private static final String TAG = "cz.fi.android.formulamanager.MainActivity";
-
+    protected BroadcastReceiver connectivityChangedReceiver;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        //TODO play with service
+        startUpdater();
+
+
+        ConnectivityManager mgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = mgr.getActiveNetworkInfo();
+        if (info == null || !info.isConnected())
+        {
+
+            connectivityChangedReceiver = new BroadcastReceiver()
+            {
+                @Override
+                public void onReceive(Context context, Intent intent)
+                {
+                    boolean noConnectivity = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+                    if (!noConnectivity)
+                    {
+                        startUpdater();
+                        try
+                        {
+                            unregisterReceiver(connectivityChangedReceiver);
+                        }
+                        catch (Exception e)
+                        {
+                            Log.e(TAG, "Handled exception during unregistering receiver: " + e.getMessage());
+                        }
+                        connectivityChangedReceiver = null;
+                    }
+                    Log.e(TAG,"Download started!");
+
+                }
+            };
+            registerReceiver(connectivityChangedReceiver, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
+        }
     }
 
     @Override
@@ -41,5 +85,11 @@ public class MainActivity extends ActionBarActivity {
             }
         }
         return super.onOptionsItemSelected(item);
+    }
+    private void startUpdater()
+    {
+        Log.e(TAG,"Service started");
+        final Intent service = new Intent(this, Updater.class);
+        this.startService(service);
     }
 }

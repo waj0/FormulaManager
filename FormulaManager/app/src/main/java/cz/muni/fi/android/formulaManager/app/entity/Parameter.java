@@ -42,9 +42,9 @@ public class Parameter implements Parcelable {
 
 
     }
-    Long id;
-    String name;
-    ParameterType type;
+    private Long id;
+    private String name;
+    private ParameterType type;
 
     public Parameter() {
     }

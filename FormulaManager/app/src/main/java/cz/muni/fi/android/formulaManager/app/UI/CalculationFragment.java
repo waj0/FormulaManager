@@ -69,15 +69,20 @@ public class CalculationFragment extends Fragment {
         this.formula = formula;
         parametersMap = new HashMap<String, RegularParameterWrapper>();
     }
-    //TODO formula sa nenacita po pauznuti aplikacie
+    //TODO formula not loading after context switch (from other map)
     //TODO button to share is visible if only list is on screen - vertical list fragment - we should remove it somehow in calculation fragment lifecycle
 
     public long getShownId() {
+        //TODO throws null pointer when empty
         return formula.getId();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        if(formula==null) {
+            //TODO message add some formulas
+            return  null;
+        }
         View view  = inflater.inflate(R.layout.calculation_layout, container, false);
 
         TextView formulaName = (TextView) view.findViewById(R.id.calculation_formula_name);

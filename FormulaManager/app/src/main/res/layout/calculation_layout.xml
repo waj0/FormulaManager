@@ -50,7 +50,7 @@
 
     </LinearLayout>
  <LinearLayout
-     android:id="@+id/calculation_formula_content"
+     android:id="@+id/calculation_formula_content_layout"
      android:layout_width="fill_parent"
      android:layout_height="200dip"
      android:orientation="horizontal">
@@ -61,4 +61,25 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
     </LinearLayout>
+    <RelativeLayout
+        android:id="@+id/calculation_result_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="30dip"
+            android:textColor="@android:color/white"
+            android:id="@+id/calculation_result_text_view"
+          />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/hologreen_color"
+            android:text="@string/compute"
+            android:layout_alignParentRight="true"
+            android:id="@+id/calculation_compute_button"/>
+
+    </RelativeLayout>
 </LinearLayout>

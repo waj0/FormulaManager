@@ -4,10 +4,12 @@ import android.text.InputType;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.util.List;
+
 /**
  * Created by Slavomír on 30.4.2014.
  */
-public class ParameterWrapper {
+public abstract class ParameterWrapper {
 
     protected static void styleEditText(EditText editText){
         // TODO play with styling
@@ -17,4 +19,13 @@ public class ParameterWrapper {
         // TODO play with styling
         textView.setText(description);
     }
+    protected Double  parseDoubleValue(EditText textField) {
+        String stringFromTextField = textField.getText().toString();
+        if(stringFromTextField == null || stringFromTextField.isEmpty()){
+            throw new IllegalArgumentException("Empty Parameter!");
+        }
+          return Double.parseDouble(stringFromTextField);
+    }
+
+
 }

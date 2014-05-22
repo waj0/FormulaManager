@@ -5,6 +5,9 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import cz.muni.fi.android.formulaManager.app.entity.Parameter;
 
 /**
@@ -24,5 +27,12 @@ public class RegularParameterWrapper extends ParameterWrapper{
         valueField = new EditText(activity);
         styleEditText(valueField);
         calculationParametersLayout.addView(valueField);
+    }
+
+
+    public Double getValue() {
+
+        return parseDoubleValue(valueField);
+
     }
 }

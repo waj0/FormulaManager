@@ -12,7 +12,6 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.GridLayout;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -377,7 +376,7 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
         EditText rawFormula = (EditText) findViewById(cz.muni.fi.android.formulaManager.app.R.id.formulaText);
 
         int currentPositionInEditText = rawFormula.getSelectionStart();
-        rawFormula.getText().insert(currentPositionInEditText, text);
+        rawFormula.getText().insert(currentPositionInEditText," " + text + " ");
     }
 
     private void prepareListData() {

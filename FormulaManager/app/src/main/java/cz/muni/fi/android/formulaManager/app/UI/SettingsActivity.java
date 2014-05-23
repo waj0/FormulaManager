@@ -8,7 +8,15 @@ import android.util.Log;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.UiLifecycleHelper;
+import com.facebook.model.GraphObject;
+import com.facebook.model.OpenGraphAction;
+import com.facebook.model.OpenGraphObject;
+import com.facebook.widget.FacebookDialog;
 import com.facebook.widget.LoginButton;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 import cz.muni.fi.android.formulaManager.app.R;
 
@@ -20,6 +28,10 @@ public class SettingsActivity extends Activity {
     ///facebook api testing
     //
     private static final String TAG = "cz.muni.fi.android.formulaManager.SettingsActivity";
+    private static final List<String> PERMISSIONS = Arrays.asList("publish_actions");
+    private boolean pendingPublishReauthorization = false;
+    private UiLifecycleHelper uiHelper;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,13 +56,14 @@ public class SettingsActivity extends Activity {
         //facebook api testing
         uiHelper = new UiLifecycleHelper(this, callback);
         uiHelper.onCreate(savedInstanceState);
-        LoginButton authButton = (LoginButton) findViewById(R.id.authButton);
+        //LoginButton authButton = (LoginButton) findViewById(R.id.authButton);
     }
 
-    private UiLifecycleHelper uiHelper;
+
     private void onSessionStateChange(Session session, SessionState state, Exception exception) {
         if (state.isOpened()) {
             Log.i(TAG, "Logged in...");
+
         } else if (state.isClosed()) {
             Log.i(TAG, "Logged out...");
         }
@@ -81,6 +94,55 @@ public class SettingsActivity extends Activity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         uiHelper.onActivityResult(requestCode, resultCode, data);
+
+        Session session = Session.getActiveSession();
+        if (session != null) {
+
+            // Check for publish permissions
+            List<String> permissions = session.getPermissions();
+            if (!isSubsetOf(PERMISSIONS, permissions)) {
+                pendingPublishReauthorization = true;
+                Session.NewPermissionsRequest newPermissionsRequest = new Session.NewPermissionsRequest(
+                        this, PERMISSIONS);
+                session.requestNewPublishPermissions(newPermissionsRequest);
+                return;
+            }
+        }
+
+        uiHelper.onActivityResult(requestCode, resultCode, data, new FacebookDialog.Callback() {
+            @Override
+            public void onError(FacebookDialog.PendingCall pendingCall, Exception error, Bundle data) {
+                Log.e("Activity", String.format("Error: %s", error.toString()));
+            }
+
+            @Override
+            public void onComplete(FacebookDialog.PendingCall pendingCall, Bundle data) {
+                Log.i("Activity", "Success!");
+            }
+        });
+/*
+        OpenGraphObject formula = OpenGraphObject.Factory.createForPost("muni_formulamanager:Formula");
+        formula.setProperty("name", "test2");
+        formula.setProperty("raw_formula", "rawtestform");
+        formula.setProperty("parameter_name", "a");
+        formula.setProperty("parameter_type", 1);
+
+        OpenGraphAction action = GraphObject.Factory.create(OpenGraphAction.class);
+        action.setProperty("formula", formula);
+
+        FacebookDialog shareDialog = new FacebookDialog.OpenGraphActionDialogBuilder(this, action, "formula")
+                .build();
+        uiHelper.trackPendingDialogCall(shareDialog.present());
+*/
+    }
+
+    public static boolean isSubsetOf(Collection<String> subset, Collection<String> superset) {
+        for (String string : subset) {
+            if (!superset.contains(string)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

@@ -39,6 +39,26 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.facebook.FacebookException;
+import com.facebook.FacebookRequestError;
+import com.facebook.HttpMethod;
+import com.facebook.Request;
+import com.facebook.RequestAsyncTask;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.android.AsyncFacebookRunner;
+import com.facebook.android.Facebook;
+import com.facebook.widget.WebDialog;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import cz.muni.fi.android.formulaManager.app.entity.Formula;
 import cz.muni.fi.android.formulaManager.app.entity.Parameter;
@@ -248,7 +268,6 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
                 //put true so creation activity edit existing formula
                 intent.putExtra(F_EDIT, true);
 
-
                 int currentapiVersion = android.os.Build.VERSION.SDK_INT;
                 if(currentapiVersion >= Build.VERSION_CODES.JELLY_BEAN) {
                     //set animation
@@ -268,9 +287,12 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Log.i(TAG, position + " short click");
-                if(mDualPane) {
-                    mListView.setItemChecked(position, true);
-                }
+
+                mListView.setItemChecked(position, true);
+                View text = view.findViewById(R.id.formula_name);
+                text.setSelected(true);
+                ((TextView) text).setHorizontallyScrolling(true);
+
                 showDetails(position);
             }
         });
@@ -311,8 +333,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             showDetails(mCurCheckPosition);
         } else {
             mListView.setSwipeDirection(EnhancedListView.SwipeDirection.START);
-            mListView.clearChoices();
-            mListView.setChoiceMode(ListView.CHOICE_MODE_NONE);
+            mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         }
     }
 
@@ -357,8 +378,9 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         //set search button properly
         MenuItem search = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView)search.getActionView();
+        searchView.setQueryHint(getActivity().getString(R.string.search_hint));
 
-        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+        /*int currentapiVersion = android.os.Build.VERSION.SDK_INT;
         if(currentapiVersion >= Build.VERSION_CODES.JELLY_BEAN) {
             //Get the ID for the search bar LinearLayout
             int searchBarId = searchView.getContext().getResources().getIdentifier("android:id/search_bar", null, null);
@@ -367,12 +389,12 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
 
             LayoutTransition transition = new LayoutTransition();
             AnimatorSet animAppear = new AnimatorSet();
-            animAppear.setDuration(300).playTogether(
+            animAppear.setDuration(500).playTogether(
                     ObjectAnimator.ofFloat(searchBar, "alpha", 0, 1),
                     ObjectAnimator.ofFloat(searchBar, "scaleY", 0, 1));
             transition.setAnimator(LayoutTransition.APPEARING, animAppear);
             searchBar.setLayoutTransition(transition);
-        }
+        }*/
 
         searchView.setOnQueryTextListener(this);
 
@@ -433,7 +455,9 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             case R.id.action_share:
                 //TODO do stuff to share, move to calc fragment
                 Log.i(TAG, "share this now");
-                facebookFeedDialog(getFormula(4));
+
+                publishStory();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -497,6 +521,17 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             Intent intent = new Intent();
             intent.setClass(getActivity(), CalculationActivity.class);
             intent.putExtra(FORMULA, getFormula(index));
+
+            int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+            if(currentapiVersion >= Build.VERSION_CODES.JELLY_BEAN) {
+                //set animation
+                View item = mListView.getChildAt(mCurCheckPosition);
+                ActivityOptions options = ActivityOptions.makeScaleUpAnimation(item, 0,
+                        0, item.getWidth(), item.getHeight());
+                getActivity().startActivity(intent, options.toBundle());
+            } else {
+                startActivity(intent);
+            }
             startActivity(intent);
         }
     }
@@ -529,7 +564,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
 
     /**
      * fetch parameters of formula from database
-     * @param f
+     * @param f formula
      */
     private void fetchParams(Formula f){
         Cursor c = getActivity().getContentResolver().query(
@@ -647,41 +682,33 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
 
 
     //TODO move to calc fragment
-    private void facebookFeedDialog(Formula badformula) {
-      /*  // Set the dialog parameters
-        Bundle params = new Bundle();
-       // params.putParcelable("formula", formula);
-        params.putString("name", "name");
-        params.putString("caption", "caps");
-        params.putString("description", "desc");
-        params.putString("link", "link");
-        params.putString("picture", "pic");
+    private boolean pendingPublishReauthorization = false;
+    private void publishStory() {
+        final List<String> PERMISSIONS = Arrays.asList("publish_actions");
+        Session session = Session.getActiveSession();
 
-        // Invoke the dialog
-        WebDialog feedDialog = (
-                new WebDialog.FeedDialogBuilder(getActivity(),
-                        Session.getActiveSession(),
-                        params))
-                .setOnCompleteListener(new WebDialog.OnCompleteListener() {
-                    @Override
-                    public void onComplete(Bundle values,
-                                           FacebookException error) {
-                        if (error == null) {
-                            // When the story is posted, echo the success
-                            // and the post Id.
-                            final String postId = values.getString("post_id");
-                            if (postId != null) {
-                                Toast.makeText(getActivity(),
-                                        "Story published: " + postId,
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    }
+        if (session != null) {
 
-                })
-                .build();
-        feedDialog.show();*/
+            // Check for publish permissions
+            List<String> permissions = session.getPermissions();
+            if (!SettingsActivity.isSubsetOf(PERMISSIONS, permissions)) {
+                pendingPublishReauthorization = true;
+                Session.NewPermissionsRequest newPermissionsRequest = new Session
+                        .NewPermissionsRequest(this, PERMISSIONS);
+                session.requestNewPublishPermissions(newPermissionsRequest);
+                return;
+            }
 
+            Bundle postParams = new Bundle();
+            postParams.putString("name", "Facebook SDK for Android");
+            postParams.putString("caption", "Build great social apps and get more installs.");
+            postParams.putString("description", "The Facebook SDK for Android makes it easier and faster to develop Facebook integrated Android apps.");
 
+            Request request = new Request(session, "me/feed", postParams,
+                    HttpMethod.POST, null);
+
+            RequestAsyncTask task = new RequestAsyncTask(request);
+            task.execute();
+        }
     }
 }

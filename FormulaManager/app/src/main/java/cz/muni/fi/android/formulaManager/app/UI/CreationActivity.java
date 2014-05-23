@@ -1,15 +1,18 @@
 package cz.muni.fi.android.formulaManager.app.UI;
 
 
+import android.animation.LayoutTransition;
 import android.app.ActionBar;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.GridLayout;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -213,6 +216,12 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
             for (Parameter p : formula.getParams()) {
                 addParamButton(p);
             }
+        }
+        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+        if(currentapiVersion >= Build.VERSION_CODES.JELLY_BEAN) {
+            LayoutTransition l = new LayoutTransition();
+            l.enableTransitionType(LayoutTransition.CHANGING);
+            paramGrid.setLayoutTransition(l);
         }
     }
 

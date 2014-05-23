@@ -60,6 +60,15 @@
                 android:gravity="center"
                 android:text="@string/label_params" />
 
+            <View
+                android:layout_width="1dp"
+                android:layout_marginTop="1dp"
+                android:layout_marginBottom="0dp"
+                android:layout_marginRight="1dp"
+                android:layout_marginLeft="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/abc_search_url_text_normal" />
+
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -102,7 +111,10 @@
             <View
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
-                android:layout_margin="1dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginBottom="1dp"
+                android:layout_marginRight="1dp"
+                android:layout_marginLeft="1dp"
                 android:background="@color/abc_search_url_text_normal" />
 
             <EditText

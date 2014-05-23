@@ -4,7 +4,7 @@
         android:fromXDelta="-100%"
         android:toXDelta="0"
         android:interpolator="@android:anim/decelerate_interpolator"
-        android:duration="250"/>
+        android:duration="400"/>
 
     <scale xmlns:android="http://schemas.android.com/apk/res/android"
         android:interpolator="@android:anim/decelerate_interpolator"
@@ -14,7 +14,7 @@
         android:toYScale="1.0"
         android:pivotX="50%p"
         android:pivotY="25%p"
-        android:startOffset="230"
+        android:startOffset="400"
         android:duration="250"
         />
 

@@ -1,9 +1,6 @@
 package cz.muni.fi.android.formulaManager.app.utils;
 
-import org.matheclipse.core.eval.EvalUtilities;
-import org.matheclipse.core.interfaces.IExpr;
 import org.matheclipse.parser.client.eval.DoubleEvaluator;
-import org.matheclipse.parser.client.math.ArithmeticMathException;
 
 import java.util.List;
 import java.util.Map;
@@ -44,9 +41,9 @@ public final class Compute {
             }
         }
         try {
-            engine.evaluate();
+            engine.evaluate(rawFormula);
             return true;
-        } catch (ArithmeticMathException ex){
+        } catch (Exception ex){
             return false;
         }
 

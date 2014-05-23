@@ -29,14 +29,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import cz.muni.fi.android.formulaManager.app.R;
+import cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper;
 import cz.muni.fi.android.formulaManager.app.entity.Formula;
 import cz.muni.fi.android.formulaManager.app.entity.Function;
 import cz.muni.fi.android.formulaManager.app.entity.FunctionHelper;
 import cz.muni.fi.android.formulaManager.app.entity.Parameter;
-import cz.muni.fi.android.formulaManager.app.R;
-import cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper;
 import cz.muni.fi.android.formulaManager.app.manager.FormulaManager;
 import cz.muni.fi.android.formulaManager.app.manager.FormulaManagerImpl;
+import cz.muni.fi.android.formulaManager.app.utils.Compute;
 
 
 /**
@@ -49,6 +50,8 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
     private GridLayout paramGrid;
     private DrawerLayout functionListDrawer;
     private ExpandableListView drawerList;
+
+    private int numberOfSteppingParameters = 0;
 
     List<String> functionGroups = new ArrayList<String>();
     HashMap<String, List<String>> functionItems = new HashMap<String, List<String>>();
@@ -85,11 +88,25 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
                 formula.setName(name);
                 formula.setRawFormula(rawFormula);
 
-                addFormulaToDatabase();
+                if (isValidFormula(rawFormula)) {
+                    addFormulaToDatabase();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Invalid formula!", Toast.LENGTH_LONG).show();
+                    return;
+                }
 
                 CreationActivity.this.finish();
             }
         });
+    }
+
+    private boolean isValidFormula(String rawFormula) {
+        List<String> parameters = new ArrayList<String>();
+        for (Parameter parameter : formula.getParams()) {
+            parameters.add(parameter.getName());
+        }
+
+        return Compute.checkIfValid(rawFormula, parameters);
     }
 
     private void initNavigationDrawer() {
@@ -111,8 +128,8 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
                 String functionName = functionItems.get(functionGroups.get(groupPosition)).get(childPosition);
                 FunctionHelper helper = Function.getFunction(functionName.toLowerCase());
 
-                if(helper.getToast() != null) {
-                    Toast.makeText(getApplicationContext(),helper.getToast(), Toast.LENGTH_LONG).show();
+                if (helper.getToast() != null) {
+                    Toast.makeText(getApplicationContext(), helper.getToast(), Toast.LENGTH_LONG).show();
                 }
 
                 writeToRawFormulaEditText(helper.getFormulaForm());
@@ -131,12 +148,26 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
             values.put(FormulaSQLHelper.Parameters.TYPE, param.getType().getIntValue());
             values.put(FormulaSQLHelper.Parameters.FORMULA_ID, formula.getId());
 
+            if(!isUsedParameter(param.getName())) {
+                continue;
+            }
+
             if (existParameterInDB(param)) {
                 getContentResolver().update(FormulaSQLHelper.Parameters.contentItemUri(param.getId()), values, null, null);
             } else {
                 getContentResolver().insert(FormulaSQLHelper.Parameters.contentUri(), values);
             }
         }
+    }
+
+    private boolean isUsedParameter(String name) {
+
+        String rawFormula = formula.getRawFormula();
+
+        String regex;
+        regex = "(.*[\\W ](" + name + ")[\\W ].*|^" + name + "[\\W ].*|.*[\\W ]" + name + "|^" + name + "$)";
+
+        return rawFormula.matches(regex);
     }
 
     private boolean existFormulaWithName(String name) {
@@ -259,15 +290,25 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
         p.setType(cpDialog.getSelectedType());
         p.setName(cpDialog.getParamName());
 
-        if(p.getName().equals("")) {
+        if (p.getType() == Parameter.ParameterType.STEP) {
+            numberOfSteppingParameters++;
+        }
+
+        if (p.getName().equals("")) {
             Toast.makeText(getApplicationContext(), "You need to fill the name of parameter!", Toast.LENGTH_LONG).show();
             return;
         }
 
-        if(existParamNameForFormula(p.getName()) && editedParameter == null ) {
+        if (existParamNameForFormula(p.getName()) && editedParameter == null) {
             Toast.makeText(getApplicationContext(), "Parameter with given name already exists!", Toast.LENGTH_LONG).show();
             return;
         }
+
+        if (numberOfSteppingParameters > 1) {
+            Toast.makeText(getApplicationContext(), "There should not be more than 1 stepping parameter!", Toast.LENGTH_LONG).show();
+            return;
+        }
+
 
         if (editedParameter != null) {
             p.setId(editedParameter.getId());
@@ -286,8 +327,8 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
 
         List<Parameter> parameters = formula.getParams();
 
-        for(Parameter parameter : parameters) {
-            if(parameter.getName().equals(name)) {
+        for (Parameter parameter : parameters) {
+            if (parameter.getName().equals(name)) {
                 return true;
             }
         }
@@ -326,7 +367,6 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
                 writeToRawFormulaEditText(parameterName);
             }
         });
-
 
 
         b.setLayoutParams(new ActionBar.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));

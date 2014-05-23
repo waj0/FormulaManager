@@ -102,7 +102,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
+        //super.onCreateView(inflater, container, savedInstanceState);
 
         Cursor c = getActivity().getContentResolver().query(FormulaSQLHelper.Formulas.contentUri(),
                 null, null, null, null);
@@ -325,6 +325,10 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         mListView.enableSwipeToDismiss();
         mListView.setSwipingLayout(R.id.row);
 
+        TextView empty = new TextView(getActivity());
+        empty.setText(R.string.label_empty);
+        mListView.setEmptyView(empty);
+
         if (mDualPane) {
             // In dual-pane mode, the list view highlights the selected item.
             mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
@@ -366,7 +370,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         // the search filter, and restart the loader to do a new query
         // with this filter.
         mCurNameFilter = !TextUtils.isEmpty(newText) ? newText : null;
-        getLoaderManager().restartLoader(0, null, this);
+        getActivity().getSupportLoaderManager().restartLoader(0, null, FormulaListFragment.this);
         return true;
     }
 

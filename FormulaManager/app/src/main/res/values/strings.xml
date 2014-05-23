@@ -4,7 +4,6 @@
     <string name="app_name">Formula Manager</string>
     <string name="label_creation">Create Formula</string>
     <string name="label_calculation">Calculate</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="action_search">Search</string>
     <string name="search_hint">Search for formula</string>
@@ -15,6 +14,7 @@
     <string name="label_formula">Formula</string>
     <string name="label_params">Parameters</string>
     <string name="label_categories">Shown categories</string>
+    <string name="label_empty">No formulas</string>
     <string name="label_add">Add</string>
     <string name="label_ok">OK</string>
     <string name="label_save">Save</string>

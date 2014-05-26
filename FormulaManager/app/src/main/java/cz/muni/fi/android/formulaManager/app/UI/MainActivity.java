@@ -16,6 +16,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import cz.muni.fi.android.formulaManager.app.R;
 import cz.muni.fi.android.formulaManager.app.service.Updater;
@@ -28,9 +29,6 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        //TODO play with service
-        startUpdater();
 
 
         ConnectivityManager mgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -53,15 +51,17 @@ public class MainActivity extends ActionBarActivity {
                         }
                         catch (Exception e)
                         {
-                            Log.e(TAG, "Handled exception during unregistering receiver: " + e.getMessage());
+                            Log.d(TAG, "Handled exception during unregistering receiver: " + e.getMessage());
                         }
                         connectivityChangedReceiver = null;
+                        Log.d(TAG,"Download started!");
                     }
-                    Log.e(TAG,"Download started!");
 
                 }
             };
             registerReceiver(connectivityChangedReceiver, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
+        } else {
+            startUpdater();
         }
     }
 
@@ -88,7 +88,8 @@ public class MainActivity extends ActionBarActivity {
     }
     private void startUpdater()
     {
-        Log.e(TAG,"Service started");
+        Toast.makeText(this, "Update started.", Toast.LENGTH_LONG).show();
+        Log.d(TAG,"Service started");
         final Intent service = new Intent(this, Updater.class);
         this.startService(service);
     }

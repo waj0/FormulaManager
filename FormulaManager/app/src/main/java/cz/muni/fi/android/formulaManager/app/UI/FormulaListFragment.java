@@ -5,9 +5,11 @@ import android.animation.AnimatorSet;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.app.ActivityOptions;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
@@ -19,6 +21,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -97,8 +100,38 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
 
+     //
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // swap new cursor for
+            Log.d(TAG, "Updating GUI");
+            Cursor c = getActivity().getContentResolver().query(FormulaSQLHelper.Formulas.contentUri(),
+                    null, null, null, null);
+            mAdapter.swapCursor(c);
+            c = getActivity().getContentResolver().query(FormulaSQLHelper.Formulas.contentUri(),
+                    null, null, null, null);
+            mAdapter.swapCursor(c);
+
+        }
+    };
+
     public FormulaListFragment() {
     }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // Register to receive messages.
+        // We are registering an observer (mMessageReceiver) to receive Intents
+        // with actions named "custom-event-name".
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(mMessageReceiver, new IntentFilter("update-UI"));
+    }
+
+    // Our handler for received Intents. This will be called whenever an Intent
+// with an action named "custom-event-name" is broadcasted.
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -154,6 +187,12 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
 
         mDrawerLayout = (DrawerLayout) inflater.inflate(R.layout.formula_list_layout, container, false);
         return mDrawerLayout;
+    }
+
+    @Override
+    public void onDestroy() {
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).unregisterReceiver(mMessageReceiver);
+        super.onDestroy();
     }
 
     @Override

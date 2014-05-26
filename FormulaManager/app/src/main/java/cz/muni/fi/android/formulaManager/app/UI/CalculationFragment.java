@@ -73,8 +73,8 @@ public class CalculationFragment extends Fragment {
     //TODO button to share is visible if only list is on screen - vertical list fragment - we should remove it somehow in calculation fragment lifecycle
 
     public long getShownId() {
-        //TODO throws null pointer when empty
-        return formula.getId();
+
+        return (formula == null)? null : formula.getId();
     }
 
     @Override
@@ -89,8 +89,7 @@ public class CalculationFragment extends Fragment {
         formulaName.setText(formula.getName());
         TextView formulaCategory= (TextView) view.findViewById(R.id.calculation_formula_category);
         formulaCategory.setText(formula.getCategory());
-        CheckBox formulaFavourite = (CheckBox) view.findViewById(R.id.calculation_favorite);
-        formulaFavourite.setChecked(formula.isFavorite());
+
 
         Button button = (Button) view.findViewById(R.id.calculation_compute_button);
         button.setOnClickListener(new ComputeButtonListener(this));
@@ -119,6 +118,7 @@ public class CalculationFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        //TODO check this
         this.stepParamName = null;
         this.stepParameter = null;
         this.parametersMap.clear();

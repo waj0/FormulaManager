@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import com.facebook.Session;
 import com.facebook.SessionState;
@@ -19,6 +20,7 @@ import java.util.Collection;
 import java.util.List;
 
 import cz.muni.fi.android.formulaManager.app.R;
+import cz.muni.fi.android.formulaManager.app.service.Updater;
 
 /**
  * Created by Majo on 1. 5. 2014.
@@ -161,5 +163,11 @@ public class SettingsActivity extends Activity {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         uiHelper.onSaveInstanceState(outState);
+    }
+
+    public void update(View view) {
+        Log.d(TAG,"Update service will be started");
+        final Intent service = new Intent(this, Updater.class);
+        this.startService(service);
     }
 }

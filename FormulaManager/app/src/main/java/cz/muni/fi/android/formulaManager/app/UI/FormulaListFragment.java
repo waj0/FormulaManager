@@ -46,6 +46,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.FacebookException;
+import com.facebook.FacebookOperationCanceledException;
 import com.facebook.FacebookRequestError;
 import com.facebook.HttpMethod;
 import com.facebook.Request;
@@ -61,6 +62,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -498,7 +500,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
                 //TODO do stuff to share, move to calc fragment
                 Log.i(TAG, "share this now");
 
-                publishStory();
+                publishFeedDialog(getFormula(0));
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -725,32 +727,62 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
 
     //TODO move to calc fragment
     private boolean pendingPublishReauthorization = false;
-    private void publishStory() {
-        final List<String> PERMISSIONS = Arrays.asList("publish_actions");
+    private void publishFeedDialog(Formula f) {
         Session session = Session.getActiveSession();
 
-        if (session != null) {
+        if (session != null){
 
-            // Check for publish permissions
-            List<String> permissions = session.getPermissions();
-            if (!SettingsActivity.isSubsetOf(PERMISSIONS, permissions)) {
-                pendingPublishReauthorization = true;
-                Session.NewPermissionsRequest newPermissionsRequest = new Session
-                        .NewPermissionsRequest(this, PERMISSIONS);
-                session.requestNewPublishPermissions(newPermissionsRequest);
-                return;
+            Bundle params = new Bundle();
+            params.putString("link", "https://github.com/waj0/FormulaManager");
+            params.putString("picture", "https://raw.githubusercontent.com/waj0/FormulaManager/master/FormulaManager/app/src/main/res/drawable-hdpi/ic_launcher.png");
+            params.putString("name", "Custom formula: " + f.getName());
+            params.putString("caption", "you can copy this to your formulaManager");
+
+            StringBuilder desc = new StringBuilder("formula: " + f.getRawFormula() + " \n" + "with parameters: ");
+            for (Parameter p : f.getParams()) {
+                desc.append(p.getName());
+                desc.append("[").append(p.getType()).append("] ");
             }
+            params.putString("description", desc.toString());
+            WebDialog feedDialog = (
+                    new WebDialog.FeedDialogBuilder(getActivity(),
+                            Session.getActiveSession(),
+                            params)).setOnCompleteListener(new WebDialog.OnCompleteListener() {
 
-            Bundle postParams = new Bundle();
-            postParams.putString("name", "Facebook SDK for Android");
-            postParams.putString("caption", "Build great social apps and get more installs.");
-            postParams.putString("description", "The Facebook SDK for Android makes it easier and faster to develop Facebook integrated Android apps.");
+                @Override
+                public void onComplete(Bundle values,
+                                       FacebookException error) {
+                    if (error == null) {
+                        // When the story is posted, echo the success
+                        // and the post Id.
+                        final String postId = values.getString("post_id");
+                        if (postId != null) {
+                            Toast.makeText(getActivity(),
+                                    "Posted story, id: "+postId,
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            // User clicked the Cancel button
+                            Toast.makeText(getActivity().getApplicationContext(),
+                                    "Publish cancelled",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    } else if (error instanceof FacebookOperationCanceledException) {
+                        // User clicked the "x" button
+                        Toast.makeText(getActivity().getApplicationContext(),
+                                "Publish cancelled",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        // Generic, ex: network error
+                        Toast.makeText(getActivity().getApplicationContext(),
+                                "Error posting story",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
 
-            Request request = new Request(session, "me/feed", postParams,
-                    HttpMethod.POST, null);
-
-            RequestAsyncTask task = new RequestAsyncTask(request);
-            task.execute();
+            })
+            .build();
+            feedDialog.show();
         }
     }
+
 }

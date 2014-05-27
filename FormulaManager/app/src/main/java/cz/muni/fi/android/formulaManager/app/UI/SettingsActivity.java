@@ -30,7 +30,7 @@ public class SettingsActivity extends Activity {
     ///facebook api testing
     //
     private static final String TAG = "cz.muni.fi.android.formulaManager.SettingsActivity";
-    private static final List<String> PERMISSIONS = Arrays.asList("publish_actions");
+    public static final List<String> PERMISSIONS = Arrays.asList("publish_actions");
     private boolean pendingPublishReauthorization = false;
     private UiLifecycleHelper uiHelper;
 

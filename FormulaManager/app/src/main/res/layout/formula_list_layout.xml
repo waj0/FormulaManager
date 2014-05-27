@@ -14,7 +14,8 @@
     <ScrollView
         android:layout_width="240dp"
         android:layout_height="match_parent"
-        android:layout_gravity="left">
+        android:layout_gravity="left"
+        android:background="#000">
 
         <LinearLayout
             android:id="@+id/drawer_list"

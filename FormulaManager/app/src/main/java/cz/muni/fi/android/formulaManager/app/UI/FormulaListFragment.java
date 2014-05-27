@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -240,6 +241,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
 
             TextView text = new TextView(getActivity());
             text.setText(categoryNames[i]);
+            text.setTextColor(Color.WHITE);
             text.setLayoutParams(lptext);
             drawerRow.addView(text);
 
@@ -293,6 +295,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
 
         mListView = (EnhancedListView) getActivity().findViewById(R.id.list);
         mListView.setAdapter(mAdapter);
+        mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
         //listener for long click on list item - starts editation of formula
         mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -328,6 +331,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
                 Log.i(TAG, position + " short click");
 
                 mListView.setItemChecked(position, true);
+                view.setSelected(true);
                 View text = view.findViewById(R.id.formula_name);
                 text.setSelected(true);
                 ((TextView) text).setHorizontallyScrolling(true);
@@ -368,15 +372,10 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         empty.setText(R.string.label_empty);
         mListView.setEmptyView(empty);
 
+
+        mListView.setSwipeDirection(EnhancedListView.SwipeDirection.START);
         if (mDualPane) {
-            // In dual-pane mode, the list view highlights the selected item.
-            mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-            mListView.setSwipeDirection(EnhancedListView.SwipeDirection.START);
-            // Make sure our UI is in the correct state.
             showDetails(mCurCheckPosition);
-        } else {
-            mListView.setSwipeDirection(EnhancedListView.SwipeDirection.START);
-            mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         }
     }
 

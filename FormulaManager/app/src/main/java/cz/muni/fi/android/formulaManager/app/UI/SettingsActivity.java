@@ -165,9 +165,4 @@ public class SettingsActivity extends Activity {
         uiHelper.onSaveInstanceState(outState);
     }
 
-    public void update(View view) {
-        Log.d(TAG,"Update service will be started");
-        final Intent service = new Intent(this, Updater.class);
-        this.startService(service);
-    }
 }

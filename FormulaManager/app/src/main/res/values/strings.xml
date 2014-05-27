@@ -31,5 +31,6 @@
     <string name="drawer_close">drawer closed</string>
     <string name="app_id">261713630674892</string>
     <string name="compute">Compute</string>
+    <string name="update">Update Formulas</string>
 
 </resources>

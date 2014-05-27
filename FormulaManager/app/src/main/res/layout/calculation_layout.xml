@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    >
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -39,15 +42,13 @@
      android:id="@+id/calculation_formula_content_layout"
      android:layout_width="fill_parent"
      android:layout_height="wrap_content"
-     android:layout_margin="10dp"
      android:orientation="horizontal">
  </LinearLayout>
     <LinearLayout
         android:id="@+id/calculation_formula_parameters"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_margin="10dp">
+        android:orientation="vertical">
     </LinearLayout>
     <RelativeLayout
         android:id="@+id/calculation_result_layout"
@@ -59,12 +60,14 @@
             android:layout_height="wrap_content"
             android:textSize="30sp"
             android:textColor="@android:color/white"
+            android:layout_margin="20dp"
+            android:paddingBottom="20dp"
             android:id="@+id/calculation_result_text_view"
           />
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/hologreen_color"
+            android:background="@drawable/roundedbutton"
             android:text="@string/compute"
             android:layout_alignParentRight="true"
             android:paddingLeft="10dp"
@@ -73,3 +76,4 @@
 
     </RelativeLayout>
 </LinearLayout>
+</ScrollView>

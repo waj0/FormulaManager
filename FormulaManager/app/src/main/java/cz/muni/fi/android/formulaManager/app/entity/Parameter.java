@@ -14,8 +14,7 @@ public class Parameter implements Parcelable {
     //types of parameters TODO sync with DB
     public static enum ParameterType {
     REGULAR(0),  //regular one value param
-    INDEX (1), //index in summation etc
-    STEP(2); //increment after each calculation
+    STEP(1); //increment after each calculation
 
         private int value;
 

@@ -122,41 +122,41 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(INDEX_FORMULA_CATEGORY_CREATE);
 
         //TODO delete dummy values
-//        for (int i=0;i<4;i++){
-//            String category = "INSERT INTO " + TABLE_CATEGORIES +
-//                    " ( " + CategoryColumns.NAME + " ) values ( " +
-//                    "'category" + i + "' " +
-//                    " );" ;
-//            sqLiteDatabase.execSQL(category);
-//        }
-//
-//        for (int i=0;i<15;i++){
-//            //insert formula
-//            String formula = "INSERT INTO " + TABLE_FORMULAS +
-//                    " ( " + Formulas.NAME + ", " +
-//                    Formulas.RAW_FORMULA + ", " +
-//                    Formulas.SVG_FORMULA + ", " +
-//                    Formulas.CATEGORY + ", " +
-//                    Formulas.FAVORITE + " " +
-//                    ") values ( " +
-//                    "'formula" + i + "', 'raw', 'svg', '" + "category" + (i+3)%4 + "', " + i%2 +
-//                    " );" ;
-//            sqLiteDatabase.execSQL(formula);
-//
-//            long lastId = getLastID(sqLiteDatabase);
-//
-//            //insert params
-//            for(int j = 0; j<i%10;j++ ) {
-//                String param = "INSERT INTO " + TABLE_PARAMETERS +
-//                        " ( " + Parameters.NAME + ", " +
-//                        Parameters.TYPE + ", " +
-//                        Parameters.FORMULA_ID + " " +
-//                        ") values ( " +
-//                        "'par" + j + "', " + 1 + ", " + lastId +
-//                        " );" ;
-//                sqLiteDatabase.execSQL(param);
-//            }
-//        }
+        for (int i=0;i<4;i++){
+            String category = "INSERT INTO " + TABLE_CATEGORIES +
+                    " ( " + CategoryColumns.NAME + " ) values ( " +
+                    "'category" + i + "' " +
+                    " );" ;
+            sqLiteDatabase.execSQL(category);
+        }
+
+        for (int i=0;i<15;i++){
+            //insert formula
+            String formula = "INSERT INTO " + TABLE_FORMULAS +
+                    " ( " + Formulas.NAME + ", " +
+                    Formulas.RAW_FORMULA + ", " +
+                    Formulas.SVG_FORMULA + ", " +
+                    Formulas.CATEGORY + ", " +
+                    Formulas.FAVORITE + " " +
+                    ") values ( " +
+                    "'formula" + i + "', 'raw', 'svg', '" + "category" + (i+3)%4 + "', " + i%2 +
+                    " );" ;
+            sqLiteDatabase.execSQL(formula);
+
+            long lastId = getLastID(sqLiteDatabase);
+
+            //insert params
+            for(int j = 0; j<i%10;j++ ) {
+                String param = "INSERT INTO " + TABLE_PARAMETERS +
+                        " ( " + Parameters.NAME + ", " +
+                        Parameters.TYPE + ", " +
+                        Parameters.FORMULA_ID + " " +
+                        ") values ( " +
+                        "'par" + j + "', " + j%2 + ", " + lastId +
+                        " );" ;
+                sqLiteDatabase.execSQL(param);
+            }
+        }
     }
 
     public long getLastID(SQLiteDatabase sqLiteDatabase) {

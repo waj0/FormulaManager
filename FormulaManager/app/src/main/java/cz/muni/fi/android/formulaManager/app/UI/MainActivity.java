@@ -23,46 +23,11 @@ import cz.muni.fi.android.formulaManager.app.service.Updater;
 
 public class MainActivity extends ActionBarActivity {
     private static final String TAG = "cz.fi.android.formulamanager.MainActivity";
-    protected BroadcastReceiver connectivityChangedReceiver;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-
-        ConnectivityManager mgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo info = mgr.getActiveNetworkInfo();
-        if (info == null || !info.isConnected())
-        {
-
-            connectivityChangedReceiver = new BroadcastReceiver()
-            {
-                @Override
-                public void onReceive(Context context, Intent intent)
-                {
-                    boolean noConnectivity = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
-                    if (!noConnectivity)
-                    {
-                        startUpdater();
-                        try
-                        {
-                            unregisterReceiver(connectivityChangedReceiver);
-                        }
-                        catch (Exception e)
-                        {
-                            Log.d(TAG, "Handled exception during unregistering receiver: " + e.getMessage());
-                        }
-                        connectivityChangedReceiver = null;
-                        Log.d(TAG,"Download started!");
-                    }
-
-                }
-            };
-            registerReceiver(connectivityChangedReceiver, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
-        } else {
-            startUpdater();
-        }
     }
 
     @Override
@@ -86,11 +51,5 @@ public class MainActivity extends ActionBarActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-    private void startUpdater()
-    {
-        Toast.makeText(this, "Update started.", Toast.LENGTH_LONG).show();
-        Log.d(TAG,"Service started");
-        final Intent service = new Intent(this, Updater.class);
-        this.startService(service);
-    }
+
 }

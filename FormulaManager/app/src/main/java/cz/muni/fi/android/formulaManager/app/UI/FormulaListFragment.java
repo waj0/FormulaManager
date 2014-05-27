@@ -1,9 +1,6 @@
 package cz.muni.fi.android.formulaManager.app.UI;
 
 
-import android.animation.AnimatorSet;
-import android.animation.LayoutTransition;
-import android.animation.ObjectAnimator;
 import android.app.ActivityOptions;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
@@ -13,6 +10,8 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -47,29 +46,14 @@ import android.widget.Toast;
 
 import com.facebook.FacebookException;
 import com.facebook.FacebookOperationCanceledException;
-import com.facebook.FacebookRequestError;
-import com.facebook.HttpMethod;
-import com.facebook.Request;
-import com.facebook.RequestAsyncTask;
-import com.facebook.Response;
 import com.facebook.Session;
-import com.facebook.android.AsyncFacebookRunner;
-import com.facebook.android.Facebook;
 import com.facebook.widget.WebDialog;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 import cz.muni.fi.android.formulaManager.app.entity.Formula;
 import cz.muni.fi.android.formulaManager.app.entity.Parameter;
 import cz.muni.fi.android.formulaManager.app.R;
 import cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper;
+import cz.muni.fi.android.formulaManager.app.service.Updater;
 import de.timroes.android.listview.EnhancedListView;
 
 
@@ -103,8 +87,8 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
 
-     //
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    protected BroadcastReceiver mConnectivityChangedReceiver;
+    private BroadcastReceiver mUpdateGuiReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             // swap new cursor for
@@ -123,8 +107,8 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Register to receive messages.
-        // We are registering an observer (mMessageReceiver) to receive Intents
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(mMessageReceiver, new IntentFilter("update-UI"));
+        // We are registering an observer (mUpdateGuiReceiver) to receive Intents
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(mUpdateGuiReceiver, new IntentFilter("update-UI"));
     }
 
 
@@ -191,7 +175,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
 
     @Override
     public void onDestroy() {
-        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).unregisterReceiver(mMessageReceiver);
+        LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).unregisterReceiver(mUpdateGuiReceiver);
         super.onDestroy();
     }
 
@@ -499,8 +483,55 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
 
                 publishFeedDialog(getFormula(0));
                 return true;
+            case R.id.action_refresh:
+                if(mConnectivityChangedReceiver != null) {
+                    // already waiting for connection.
+                    return  true;
+                }
+                ConnectivityManager mgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo info = mgr.getActiveNetworkInfo();
+                if (info == null || !info.isConnected())
+                {
+
+                    mConnectivityChangedReceiver = new BroadcastReceiver()
+                    {
+                        @Override
+                        public void onReceive(Context context, Intent intent)
+                        {
+                            boolean noConnectivity = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+                            if (!noConnectivity)
+                            {
+                                startUpdater();
+                                try
+                                {
+                                    getActivity().unregisterReceiver(mConnectivityChangedReceiver);
+                                }
+                                catch (Exception e)
+                                {
+                                    Log.d(TAG, "Handled exception during unregistering receiver: " + e.getMessage());
+                                }
+                                mConnectivityChangedReceiver = null;
+                                Log.d(TAG,"Connection found - update started!");
+                            }
+
+                        }
+                    };
+                    getActivity().registerReceiver(mConnectivityChangedReceiver, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
+                } else {
+                    startUpdater();
+                }
+            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void startUpdater() {
+        Log.d(TAG, "Update service will be started");
+        final Intent service = new Intent(getActivity(), Updater.class);
+        getActivity().startService(service);
+        Toast.makeText(getActivity(),
+                "Update started!",
+                Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -80,12 +80,12 @@ public class CreateParamDialog extends DialogFragment {
             }
         });
         r = (RadioButton) dialog.findViewById(R.id.radioButton2);
-        r.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setSelectedType(Parameter.ParameterType.INDEX);
-            }
-        });
+//        r.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                setSelectedType(Parameter.ParameterType.INDEX);
+//            }
+//        });
         r = (RadioButton) dialog.findViewById(R.id.radioButton3);
         r.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,9 +120,9 @@ public class CreateParamDialog extends DialogFragment {
             case REGULAR:
                 group.check(cz.muni.fi.android.formulaManager.app.R.id.radioButton1);
                 break;
-            case INDEX:
-                group.check(R.id.radioButton2);
-                break;
+//            case INDEX:
+//                group.check(R.id.radioButton2);
+//                break;
             case STEP:
                 group.check(R.id.radioButton3);
                 break;

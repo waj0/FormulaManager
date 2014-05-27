@@ -109,13 +109,10 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         public void onReceive(Context context, Intent intent) {
             // swap new cursor for
             Log.d(TAG, "Updating GUI");
+            loadCategoriesFromDB();
             Cursor c = getActivity().getContentResolver().query(FormulaSQLHelper.Formulas.contentUri(),
                     null, null, null, null);
             mAdapter.swapCursor(c);
-            c = getActivity().getContentResolver().query(FormulaSQLHelper.Formulas.contentUri(),
-                    null, null, null, null);
-            mAdapter.swapCursor(c);
-
         }
     };
 
@@ -127,12 +124,8 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         super.onCreate(savedInstanceState);
         // Register to receive messages.
         // We are registering an observer (mMessageReceiver) to receive Intents
-        // with actions named "custom-event-name".
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(mMessageReceiver, new IntentFilter("update-UI"));
     }
-
-    // Our handler for received Intents. This will be called whenever an Intent
-// with an action named "custom-event-name" is broadcasted.
 
 
 
@@ -175,11 +168,18 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             }
         });
 
+        loadCategoriesFromDB();
+
+        mDrawerLayout = (DrawerLayout) inflater.inflate(R.layout.formula_list_layout, container, false);
+        return mDrawerLayout;
+    }
+
+    private void loadCategoriesFromDB() {
         Cursor cats = getActivity().getContentResolver().query(FormulaSQLHelper.Categories.contentUri(),null,null,null,null);
         categoriesCount = cats.getCount() + 1;//+1 for favorites
         mCurCategoryFilter = new boolean[categoriesCount];
         categoryNames = new String[categoriesCount];
-        categoryNames[0] = getString(R.string.show_favs);
+        categoryNames[0] = getString(cz.muni.fi.android.formulaManager.app.R.string.show_favs);
 
         cats.moveToFirst();
         int columnIndex = cats.getColumnIndex(FormulaSQLHelper.Categories.NAME);
@@ -187,9 +187,6 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             categoryNames[i] = cats.getString(columnIndex);
             cats.moveToNext();
         }
-
-        mDrawerLayout = (DrawerLayout) inflater.inflate(R.layout.formula_list_layout, container, false);
-        return mDrawerLayout;
     }
 
     @Override

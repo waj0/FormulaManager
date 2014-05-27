@@ -4,11 +4,8 @@ import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,7 +19,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import cz.muni.fi.android.formulaManager.app.UI.FormulaListFragment;
 import cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper;
 import cz.muni.fi.android.formulaManager.app.entity.Formula;
 import cz.muni.fi.android.formulaManager.app.entity.Parameter;
@@ -35,11 +31,14 @@ public class Updater extends IntentService {
     public Updater() {
         super("Updater");
     }
-    static final String JsonFormulaName="name";
-    static final String JsonFormulaRaw="rawFormula";
-    static final String JsonFormulaSvg="svgFormula";
-    static final String JsonFormulaCategory="category";
-    static final String JsonFormulaParameters="parameters";
+    static final String JSON_FORMULA_NAME ="name";
+    static final String JSON_FORMULA_RAW ="rawFormula";
+    static final String JSON_FORMULA_SVG ="svgFormula";
+    static final String JSON_FORMULA_CATEGORY ="category";
+    static final String JSON_FORMULA_PARAMETERS ="parameters";
+    static final String JSON_FORMULA_PARAMETER_NAME ="name";
+    static final String JSON_FORMULA_PARAMETER_TYPE ="type";
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -49,7 +48,7 @@ public class Updater extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent)
     {//TODO synchronization with listfragment
-        Log.d(TAG, "Starting service ");
+        Log.d(TAG, "Starting updater");
         try
         {
             final URL url = new URL("http://www.fi.muni.cz/~xkrupa2/PV239/formula.json");
@@ -69,31 +68,40 @@ public class Updater extends IntentService {
 
                     try
                     {
-
                         final JSONArray formulas = new JSONArray(sb.toString());
-                        Log.d(TAG, "Inserting " + formulas.length() + " formulas.");
+
                         List<ContentValues> entityList = new ArrayList<ContentValues>(formulas.length());
+                        List<ContentValues> categories = new ArrayList<ContentValues>(formulas.length());
                         for (int i = 0; i < formulas.length(); i++)
                         {
                             JSONObject formulaJson = formulas.getJSONObject(i);
                             Formula formula = parseFormula(formulaJson);
-                            Cursor c = getContentResolver()
+                            Cursor formulasCursor = getContentResolver()
                                     .query(FormulaSQLHelper.Formulas.contentUri(), null, FormulaSQLHelper.Formulas.NAME + "=?", new String[]{formula.getName()}, null);
-                            if(c.getCount()!= 0){
+                            if(formulasCursor.getCount()!= 0){
                                 Log.d(TAG, "Conflict name "+ formula.getName() );
-                                continue;
+                               continue;
                             }
+                            //TODO uncomment for category adding
+//                            Cursor categoriesCursor = getContentResolver()
+//                                    .query(FormulaSQLHelper.Categories.contentUri(), null, FormulaSQLHelper.Categories.NAME + "=?", new String[]{formula.getCategory()}, null);
+//                            if(categoriesCursor.getCount() == 0) {
+//                                Log.d(TAG, "Adding category " + formula.getCategory());
+//                                ContentValues category = new ContentValues();
+//                                category.put(FormulaSQLHelper.Categories.NAME, formula.getCategory());
+//                                categories.add(category);
+//                            }
                             entityList.add(Formula.getValues(formula));
-                            Log.d(TAG, "Formula " + formula + " will be added" );
+                            Log.d(TAG, "Formula " + formula.getName() + " will be added" );
                             //TODO insert all parameters
                         }
 
-                        int inserted = getContentResolver().bulkInsert(FormulaSQLHelper.Formulas.contentUri(), entityList.toArray(new ContentValues[entityList.size()]));
-                        //TODO maybe some check if all added
+                        int categoryCount = getContentResolver().bulkInsert(FormulaSQLHelper.Categories.contentUri(), categories.toArray(new ContentValues[categories.size()]));
+                        Log.d(TAG, "Inserted " +  categoryCount + " categories.");
+                        int formulaCount = getContentResolver().bulkInsert(FormulaSQLHelper.Formulas.contentUri(), entityList.toArray(new ContentValues[entityList.size()]));
+                        Log.d(TAG, "Inserted " +  formulaCount + " formulas.");
                         Intent updateIntent = new Intent("update-UI");
                         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(updateIntent);
-
-
                     } catch (JSONException   e)
                     {
                         Log.d(TAG, "json error " + e.getMessage());
@@ -118,14 +126,15 @@ public class Updater extends IntentService {
     private static Formula parseFormula(JSONObject formulaJson) throws JSONException {
         Formula formula = new Formula();
         formula.setId(null);
-        formula.setName(formulaJson.getString(JsonFormulaName));
-        formula.setRawFormula(formulaJson.getString(JsonFormulaRaw));
-        formula.setSvgFormula(formulaJson.getString(JsonFormulaSvg));
-        formula.setCategory(formulaJson.getString(JsonFormulaCategory));
+        formula.setName(formulaJson.getString(JSON_FORMULA_NAME));
+        formula.setRawFormula(formulaJson.getString(JSON_FORMULA_RAW));
+        formula.setSvgFormula(formulaJson.getString(JSON_FORMULA_SVG));
+        //TODO uncomment when categories reload works
+//        formula.setCategory(formulaJson.getString(JSON_FORMULA_CATEGORY));
         formula.setFavorite(false);
         List<Parameter> parameterList;
-        if(formulaJson.has(JsonFormulaParameters)) {
-            JSONObject parameters = formulaJson.getJSONObject(JsonFormulaParameters);
+        if(formulaJson.has(JSON_FORMULA_PARAMETERS)) {
+            JSONArray parameters = formulaJson.getJSONArray(JSON_FORMULA_PARAMETERS);
             parameterList = parseParameters(parameters);
         }
         else {
@@ -135,8 +144,16 @@ public class Updater extends IntentService {
         return formula;
     }
 
-    private static List<Parameter> parseParameters(JSONObject parameters) {
-        //TODO implementation
-        return null;
+    private static List<Parameter> parseParameters(JSONArray parameters) throws JSONException {
+        List<Parameter> parameterList = new ArrayList<Parameter>(parameters.length());
+        for (int i = 0; i < parameters.length(); i++){
+            JSONObject jsonParameter = parameters.getJSONObject(i);
+            Parameter parameter = new Parameter();
+            parameter.setName(jsonParameter.getString(JSON_FORMULA_PARAMETER_NAME));
+            Parameter.ParameterType parameterType = Parameter.ParameterType.fromIntValue(jsonParameter.getInt(JSON_FORMULA_PARAMETER_TYPE));
+            parameter.setType(parameterType);
+            parameterList.add(parameter);
+        }
+    return parameterList;
     }
 }

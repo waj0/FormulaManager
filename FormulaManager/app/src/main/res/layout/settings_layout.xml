@@ -15,7 +15,8 @@
         android:layout_height="wrap_content"
         android:background="@color/hologreen_color"
         android:layout_gravity="center_horizontal"
-        android:text="update"
+        android:layout_margin="5dip"
+        android:text="Manual update"
         android:id="@+id/settings_update"
         android:onClick="update"/>
 </LinearLayout>

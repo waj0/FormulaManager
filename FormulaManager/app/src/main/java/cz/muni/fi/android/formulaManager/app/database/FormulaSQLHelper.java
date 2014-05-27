@@ -302,7 +302,7 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
         /**
          * uri path for the list of categories
          */
-        static final String PATH_PARAMETERS = "categories";
+        static final String PATH_CATEGORIES = "categories";
 
         /**
          * mime/content type for list of categories
@@ -324,7 +324,7 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
         public static Uri contentUri()
         {
             final Uri.Builder b = FormulaProvider.AUTHORITY_URI.buildUpon();
-            b.appendPath(PATH_PARAMETERS);
+            b.appendPath(PATH_CATEGORIES);
             return b.build();
         }
     }

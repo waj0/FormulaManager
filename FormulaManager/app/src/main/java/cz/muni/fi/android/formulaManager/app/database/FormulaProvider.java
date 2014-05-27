@@ -35,7 +35,7 @@ public class FormulaProvider extends ContentProvider {
         sUriMatcher.addURI(AUTHORITY, FormulaSQLHelper.Formulas.PATH_FORMULAS + "/*", FORMULAS_ITEM);
         sUriMatcher.addURI(AUTHORITY, FormulaSQLHelper.Parameters.PATH_PARAMETERS, PARAMETERS);
         sUriMatcher.addURI(AUTHORITY, FormulaSQLHelper.Parameters.PATH_PARAMETERS + "/*", PARAMETERS_ITEM);
-        sUriMatcher.addURI(AUTHORITY, FormulaSQLHelper.Categories.PATH_PARAMETERS, CATEGORIES);
+        sUriMatcher.addURI(AUTHORITY, FormulaSQLHelper.Categories.PATH_CATEGORIES, CATEGORIES);
     }
 
     private FormulaSQLHelper mDatabaseHelper;
@@ -134,6 +134,11 @@ public class FormulaProvider extends ContentProvider {
                 noteUri = ContentUris.withAppendedId(FormulaSQLHelper.Parameters.contentUri(), rowId);
                 break;
             }
+            case CATEGORIES:{
+                db.insert(FormulaSQLHelper.TABLE_CATEGORIES, null, values);
+                noteUri = FormulaSQLHelper.Categories.contentUri();
+                break;
+            }
             default: throw new IllegalArgumentException("Unknown URI " + uri);
         }
 
@@ -172,6 +177,11 @@ public class FormulaProvider extends ContentProvider {
             case PARAMETERS: {
                 //set table
                 table = FormulaSQLHelper.TABLE_PARAMETERS;
+                break;
+            }
+            case CATEGORIES: {
+                //set table
+                table = FormulaSQLHelper.TABLE_CATEGORIES;
                 break;
             }
             default: throw new IllegalArgumentException("Unknown URI " + uri);

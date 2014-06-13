@@ -3,6 +3,7 @@ package cz.muni.fi.android.formulaManager.app.UI;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 
@@ -25,7 +26,7 @@ import cz.muni.fi.android.formulaManager.app.service.Updater;
 /**
  * Created by Majo on 1. 5. 2014.
  */
-public class SettingsActivity extends Activity {
+public class SettingsActivity extends ActionBarActivity {
 
     private static final String TAG = "cz.muni.fi.android.formulaManager.SettingsActivity";
     public static final List<String> PERMISSIONS = Arrays.asList("publish_actions");

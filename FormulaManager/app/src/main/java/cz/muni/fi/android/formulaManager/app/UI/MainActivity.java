@@ -1,25 +1,13 @@
 package cz.muni.fi.android.formulaManager.app.UI;
 
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.nfc.Tag;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import cz.muni.fi.android.formulaManager.app.R;
-import cz.muni.fi.android.formulaManager.app.service.Updater;
 
 public class MainActivity extends ActionBarActivity {
     private static final String TAG = "cz.fi.android.formulamanager.MainActivity";

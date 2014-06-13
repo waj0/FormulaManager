@@ -32,12 +32,11 @@
 
             <Button
                 android:id="@+id/save_button"
-                style="?android:attr/borderlessButtonStyle"
                 android:layout_width="0px"
                 android:layout_height="wrap_content"
                 android:layout_weight="3"
                 android:text="@string/label_save"
-                android:background="@color/hologreen_color"/>
+                android:background="@drawable/roundedbutton"/>
         </LinearLayout>
 
         <View
@@ -68,10 +67,11 @@
 
                 <ImageButton
                     android:id="@+id/add_button"
+                    android:layout_margin="5dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_action_new"
-                    android:background="@color/hologreen_color"/>
+                    android:background="@drawable/roundedbutton"/>
 
 
             </android.support.v7.widget.GridLayout>
@@ -95,7 +95,8 @@
             android:layout_height="0px"
             android:layout_weight="3"
             android:inputType="textMultiLine"
-            android:numeric="decimal" />
+            android:numeric="decimal"
+            android:hint="@string/label_raw_formula" />
 
     </LinearLayout>
 

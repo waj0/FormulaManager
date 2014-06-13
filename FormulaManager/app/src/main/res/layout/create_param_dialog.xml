@@ -37,11 +37,11 @@
             android:id="@+id/radioButton1"
             android:checked="true" />
 
-        <RadioButton
+        <!--RadioButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/label_param_type2"
-            android:id="@+id/radioButton2" />
+            android:id="@+id/radioButton2" /-->
 
         <RadioButton
             android:layout_width="match_parent"

@@ -79,7 +79,7 @@ public class CreateParamDialog extends DialogFragment {
                 setSelectedType(Parameter.ParameterType.REGULAR);
             }
         });
-        r = (RadioButton) dialog.findViewById(R.id.radioButton2);
+//        r = (RadioButton) dialog.findViewById(R.id.radioButton2);
 //        r.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {

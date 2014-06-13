@@ -38,24 +38,4 @@ public class CalculationActivity extends ActionBarActivity {
             ft.add(android.R.id.content, details).commit();
         }
     }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.calculation, menu);
-        return true;
-    }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        switch(item.getItemId()) {
-            case R.id.action_share:
-                //TODO do stuff to share
-                Log.i(TAG, "share this now");
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-
 }

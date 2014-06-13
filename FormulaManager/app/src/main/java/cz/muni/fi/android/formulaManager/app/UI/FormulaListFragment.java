@@ -44,11 +44,6 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.facebook.FacebookException;
-import com.facebook.FacebookOperationCanceledException;
-import com.facebook.Session;
-import com.facebook.widget.WebDialog;
-
 import cz.muni.fi.android.formulaManager.app.entity.Formula;
 import cz.muni.fi.android.formulaManager.app.entity.Parameter;
 import cz.muni.fi.android.formulaManager.app.R;
@@ -405,22 +400,6 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         SearchView searchView = (SearchView)search.getActionView();
         searchView.setQueryHint(getActivity().getString(R.string.search_hint));
 
-        /*int currentapiVersion = android.os.Build.VERSION.SDK_INT;
-        if(currentapiVersion >= Build.VERSION_CODES.JELLY_BEAN) {
-            //Get the ID for the search bar LinearLayout
-            int searchBarId = searchView.getContext().getResources().getIdentifier("android:id/search_bar", null, null);
-            //Get the search bar Linearlayout
-            LinearLayout searchBar = (LinearLayout) searchView.findViewById(searchBarId);
-
-            LayoutTransition transition = new LayoutTransition();
-            AnimatorSet animAppear = new AnimatorSet();
-            animAppear.setDuration(500).playTogether(
-                    ObjectAnimator.ofFloat(searchBar, "alpha", 0, 1),
-                    ObjectAnimator.ofFloat(searchBar, "scaleY", 0, 1));
-            transition.setAnimator(LayoutTransition.APPEARING, animAppear);
-            searchBar.setLayoutTransition(transition);
-        }*/
-
         searchView.setOnQueryTextListener(this);
 
         // backwards compatible listeners to reset list after search widget was closed
@@ -438,15 +417,6 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
                 return true;
             }
         });
-
-        // Check to see if we have a frame in which to embed the details
-        // fragment directly in the containing UI. //TODO share button problem
-        View detailsFrame = getActivity().findViewById(R.id.details);
-        mDualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
-        if (mDualPane) {
-            //menu.removeItem(R.id.action_share);
-            inflater.inflate(R.menu.calculation, menu);
-        }
     }
 
     @Override
@@ -477,12 +447,6 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
                 }
                 return true;
             }
-            case R.id.action_share:
-                //TODO do stuff to share, move to calc fragment
-                Log.i(TAG, "share this now");
-
-                publishFeedDialog(getFormula(0));
-                return true;
             case R.id.action_refresh:
                 if(mConnectivityChangedReceiver != null) {
                     // already waiting for connection.
@@ -536,16 +500,23 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
+        // Check to see if we have a frame in which to embed the details
+        // fragment directly in the containing UI.
+        View detailsFrame = getActivity().findViewById(R.id.details);
+        mDualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
+        MenuItem m = menu.findItem(R.id.action_share);
+
         //disable buttons if drawer is visible
         boolean drawer = mDrawerLayout.isDrawerVisible(Gravity.LEFT);
         menu.findItem(R.id.action_settings).setVisible(!drawer);
         menu.findItem(R.id.action_search).setVisible(!drawer);
         menu.findItem(R.id.action_new).setVisible(!drawer);
-        MenuItem m = menu.findItem(R.id.action_share);
+        menu.findItem(R.id.action_refresh).setVisible(!drawer);
         if(m != null) {
-            m.setVisible(!drawer);
-            //Log.i(TAG, "prepare menu list fragment disable share " + m.isVisible());
+            menu.findItem(R.id.action_share).setVisible(!drawer && mDualPane);
+            Log.i(TAG, "disable/enable share button" + m.isVisible());
         }
+
     }
 
     @Override
@@ -751,66 +722,4 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             Log.i(TAG, "updated " + rows + " " + id);
         }
     }
-
-
-    //TODO move to calc fragment
-    private boolean pendingPublishReauthorization = false;
-    private void publishFeedDialog(Formula f) {
-        Session session = Session.getActiveSession();
-
-        if (session != null){
-
-            Bundle params = new Bundle();
-            params.putString("link", "https://github.com/waj0/FormulaManager");
-            params.putString("picture", "https://raw.githubusercontent.com/waj0/FormulaManager/master/FormulaManager/app/src/main/res/drawable-hdpi/ic_launcher.png");
-            params.putString("name", "Custom formula: " + f.getName());
-            params.putString("caption", "you can copy this to your formulaManager");
-
-            StringBuilder desc = new StringBuilder("formula: " + f.getRawFormula() + " \n" + "with parameters: ");
-            for (Parameter p : f.getParams()) {
-                desc.append(p.getName());
-                desc.append("[").append(p.getType()).append("] ");
-            }
-            params.putString("description", desc.toString());
-            WebDialog feedDialog = (
-                    new WebDialog.FeedDialogBuilder(getActivity(),
-                            Session.getActiveSession(),
-                            params)).setOnCompleteListener(new WebDialog.OnCompleteListener() {
-
-                @Override
-                public void onComplete(Bundle values,
-                                       FacebookException error) {
-                    if (error == null) {
-                        // When the story is posted, echo the success
-                        // and the post Id.
-                        final String postId = values.getString("post_id");
-                        if (postId != null) {
-                            Toast.makeText(getActivity(),
-                                    "Posted story, id: "+postId,
-                                    Toast.LENGTH_SHORT).show();
-                        } else {
-                            // User clicked the Cancel button
-                            Toast.makeText(getActivity().getApplicationContext(),
-                                    "Publish cancelled",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    } else if (error instanceof FacebookOperationCanceledException) {
-                        // User clicked the "x" button
-                        Toast.makeText(getActivity().getApplicationContext(),
-                                "Publish cancelled",
-                                Toast.LENGTH_SHORT).show();
-                    } else {
-                        // Generic, ex: network error
-                        Toast.makeText(getActivity().getApplicationContext(),
-                                "Error posting story",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-            })
-            .build();
-            feedDialog.show();
-        }
-    }
-
 }

@@ -26,9 +26,7 @@ import cz.muni.fi.android.formulaManager.app.service.Updater;
  * Created by Majo on 1. 5. 2014.
  */
 public class SettingsActivity extends Activity {
-    //
-    ///facebook api testing
-    //
+
     private static final String TAG = "cz.muni.fi.android.formulaManager.SettingsActivity";
     public static final List<String> PERMISSIONS = Arrays.asList("publish_actions");
     private boolean pendingPublishReauthorization = false;
@@ -122,20 +120,6 @@ public class SettingsActivity extends Activity {
                 Log.i("Activity", "Success!");
             }
         });
-/*
-        OpenGraphObject formula = OpenGraphObject.Factory.createForPost("muni_formulamanager:Formula");
-        formula.setProperty("name", "test2");
-        formula.setProperty("raw_formula", "rawtestform");
-        formula.setProperty("parameter_name", "a");
-        formula.setProperty("parameter_type", 1);
-
-        OpenGraphAction action = GraphObject.Factory.create(OpenGraphAction.class);
-        action.setProperty("formula", formula);
-
-        FacebookDialog shareDialog = new FacebookDialog.OpenGraphActionDialogBuilder(this, action, "formula")
-                .build();
-        uiHelper.trackPendingDialogCall(shareDialog.present());
-*/
     }
 
     public static boolean isSubsetOf(Collection<String> subset, Collection<String> superset) {

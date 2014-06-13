@@ -9,6 +9,9 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -18,6 +21,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.facebook.FacebookException;
+import com.facebook.FacebookOperationCanceledException;
+import com.facebook.Session;
+import com.facebook.widget.WebDialog;
 import com.larvalabs.svgandroid.SVG;
 import com.larvalabs.svgandroid.SVGParseException;
 import com.larvalabs.svgandroid.SVGParser;
@@ -253,6 +260,91 @@ public class CalculationFragment extends Fragment {
     }
 
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // TODO Add your menu entries here
+        inflater.inflate(R.menu.calculation, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.action_share:
+                Log.i(TAG, "share from fragment");
+                publishFeedDialog(formula);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
 
+    }
+    private void publishFeedDialog(Formula f) {
+        Session session = Session.getActiveSession();
+
+        if (session == null){
+            Toast.makeText(getActivity().getApplicationContext(),
+                    "Log in first",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Bundle params = new Bundle();
+        params.putString("link", "https://github.com/waj0/FormulaManager");
+        params.putString("picture", "https://raw.githubusercontent.com/waj0/FormulaManager/master/FormulaManager/app/src/main/res/drawable-hdpi/ic_launcher.png");
+        params.putString("name", "Custom formula: " + f.getName());
+        params.putString("caption", "you can copy this to your formulaManager");
+
+        StringBuilder desc = new StringBuilder("formula: " + f.getRawFormula() + " \n" + "with parameters: ");
+        for (Parameter p : f.getParams()) {
+            desc.append(p.getName());
+            desc.append("[").append(p.getType()).append("] ");
+        }
+        params.putString("description", desc.toString());
+        WebDialog feedDialog = (
+                new WebDialog.FeedDialogBuilder(getActivity(),
+                        Session.getActiveSession(),
+                        params)).setOnCompleteListener(new WebDialog.OnCompleteListener() {
+
+            @Override
+            public void onComplete(Bundle values,
+                                   FacebookException error) {
+                if (error == null) {
+                    // When the story is posted, echo the success
+                    // and the post Id.
+                    final String postId = values.getString("post_id");
+                    if (postId != null) {
+                        Toast.makeText(getActivity(),
+                                "Formula published",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        // User clicked the Cancel button
+                        Toast.makeText(getActivity().getApplicationContext(),
+                                "Publish cancelled",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                } else if (error instanceof FacebookOperationCanceledException) {
+                    // User clicked the "x" button
+                    Toast.makeText(getActivity().getApplicationContext(),
+                            "Publish cancelled",
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    // Generic, ex: network error
+                    Toast.makeText(getActivity().getApplicationContext(),
+                            "Error posting story",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+        })
+                .build();
+        feedDialog.show();
+
+    }
 }

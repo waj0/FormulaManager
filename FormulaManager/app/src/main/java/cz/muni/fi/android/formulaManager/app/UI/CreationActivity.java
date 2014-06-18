@@ -2,7 +2,6 @@ package cz.muni.fi.android.formulaManager.app.UI;
 
 
 import android.animation.LayoutTransition;
-import android.app.ActionBar;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
@@ -12,11 +11,13 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.GridLayout;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
@@ -47,6 +48,7 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
     private static final String TAG = "cz.fi.android.formulamanager.CreationActivity";
 
     private GridLayout paramGrid;
+
     private DrawerLayout functionListDrawer;
     private ExpandableListView drawerList;
 
@@ -224,10 +226,6 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
     protected void onStart() {
         super.onStart();
         paramGrid = (GridLayout) findViewById(R.id.params_grid);
-        paramGrid.setOrientation(GridLayout.HORIZONTAL);
-
-        //TODO long text in buttons is problem, set columns from dispay width and/or max button width
-        paramGrid.setColumnCount(3);
 
         ImageButton addParam = (ImageButton) findViewById(R.id.add_button);
         addParam.setOnClickListener(new View.OnClickListener() {
@@ -345,8 +343,17 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
             return;
         }
 
+        GridLayout.LayoutParams lp = new GridLayout.LayoutParams();
+        lp.setGravity(Gravity.FILL);
+        lp.setMargins(3,3,3,3);
         final Button b = new Button(this);
         b.setText(p.getName());
+        b.setLayoutParams(lp);
+        b.setPadding(3, 3, 3, 3);
+        b.setLines(1);
+        b.getLayoutParams().height = Math.round(dipToPixels((float)70.0));
+        b.setMaxWidth(Math.round(dipToPixels((float)70.0)));
+        b.setTextSize(25);
 
         final int index = paramGrid.getChildCount() - 1;
 
@@ -367,9 +374,12 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
             }
         });
 
-
-        b.setLayoutParams(new ActionBar.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         paramGrid.addView(b, index);
+    }
+
+    private float dipToPixels(float dipValue) {
+        DisplayMetrics metrics = getBaseContext().getResources().getDisplayMetrics();
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
     }
 
     private void writeToRawFormulaEditText(String text) {

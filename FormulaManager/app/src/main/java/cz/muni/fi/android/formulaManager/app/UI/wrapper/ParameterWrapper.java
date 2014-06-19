@@ -12,11 +12,9 @@ import java.util.List;
 public abstract class ParameterWrapper {
 
     protected static void styleEditText(EditText editText){
-        // TODO play with styling
-        editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+        editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
     }
     protected static void styleDescText(TextView textView,String description){
-        // TODO play with styling
         textView.setText(description);
     }
     protected Double  parseDoubleValue(EditText textField) {

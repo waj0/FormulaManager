@@ -3,21 +3,21 @@
     <string-array name="function_groups">
         <item>Constants</item>
         <item>Trigonometric Functions</item>
-        <item>Relational Operators</item>
+        <!--<item>Relational Operators</item>-->
         <item>Rounding</item>
-        <item>Analysis</item>
+        <!--<item>Analysis</item>-->
         <item>General Functions</item>
-        <item>Divisor and Multiple</item>
+        <!--<item>Divisor and Multiple</item>-->
     </string-array>
 
     <string-array name="constants">
         <item>E</item>
         <item>PI</item>
-        <item>True</item>
-        <item>False</item>
-        <item>Degree</item>
+        <!--<item>True</item>-->
+        <!--<item>False</item>-->
+        <!--<item>Degree</item>-->
         <item>Golden Ratio</item>
-        <item>Infinity</item>
+        <!--<item>Infinity</item>-->
     </string-array>
 
     <string-array name="trigonometric_functions">
@@ -53,13 +53,13 @@
     </string-array>
 
     <string-array name="general_functions">
-        <item>Sum</item>
+        <!--<item>Sum</item>-->
         <item>Exponential function</item>
         <item>Logarithm</item>
-        <item>Binomial</item>
-        <item>Absolute</item>
-        <item>Simplify</item>
-        <item>Factorial</item>
+        <!--<item>Binomial</item>-->
+        <!--<item>Absolute</item>-->
+        <!--<item>Simplify</item>-->
+        <!--<item>Factorial</item>-->
     </string-array>
 
     <string-array name="divisor_and_multiple">

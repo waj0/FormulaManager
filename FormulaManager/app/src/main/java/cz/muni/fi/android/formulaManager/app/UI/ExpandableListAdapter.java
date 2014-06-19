@@ -54,6 +54,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         }
 
         TextView item = (TextView) convertView.findViewById(R.id.function);
+        item.setTextSize(20);
         item.setText(childText);
 
         return convertView;
@@ -94,6 +95,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         }
 
         TextView item = (TextView) convertView.findViewById(R.id.function);
+        item.setTextSize(25);
         item.setTypeface(null, Typeface.BOLD);
         item.setText(headerTitle);
         return convertView;

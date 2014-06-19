@@ -89,9 +89,10 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             // swap new cursor for
             Log.d(TAG, "Updating GUI");
             loadCategoriesFromDB();
-            Cursor c = getActivity().getContentResolver().query(FormulaSQLHelper.Formulas.contentUri(),
+            getActivity().getSupportLoaderManager().restartLoader(0, null, FormulaListFragment.this);
+            /*Cursor c = getActivity().getContentResolver().query(FormulaSQLHelper.Formulas.contentUri(),
                     null, null, null, null);
-            mAdapter.swapCursor(c);
+            mAdapter.swapCursor(c);*/
         }
     };
 
@@ -157,6 +158,9 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         Cursor cats = getActivity().getContentResolver().query(FormulaSQLHelper.Categories.contentUri(),null,null,null,null);
         categoriesCount = cats.getCount() + 1;//+1 for favorites
         mCurCategoryFilter = new boolean[categoriesCount];
+        for(int i = 0; i<categoriesCount;i++){
+            mCurCategoryFilter[i] = true;
+        }
         categoryNames = new String[categoriesCount];
         categoryNames[0] = getString(cz.muni.fi.android.formulaManager.app.R.string.show_favs);
 

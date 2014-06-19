@@ -37,7 +37,7 @@ public final class Compute {
         engine.clearVariables();
         if(parameters!= null) {
             for (String paramName : parameters) {
-                engine.defineVariable(paramName);
+                engine.defineVariable(paramName,1.0);
             }
         }
         try {

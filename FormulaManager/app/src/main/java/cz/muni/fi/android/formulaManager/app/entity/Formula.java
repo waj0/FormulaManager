@@ -34,7 +34,7 @@ public class Formula implements Parcelable {
         if (item.getSvgFormula() == null) {
             cv.putNull(FormulaSQLHelper.Formulas.SVG_FORMULA);
         } else {
-            cv.put(FormulaSQLHelper.Formulas.SVG_FORMULA, item.getSvgFormula() == null);
+            cv.put(FormulaSQLHelper.Formulas.SVG_FORMULA, item.getSvgFormula());
         }
         cv.put(FormulaSQLHelper.Formulas.CATEGORY, item.getCategory());
         cv.put(FormulaSQLHelper.Formulas.FAVORITE, item.isFavorite());

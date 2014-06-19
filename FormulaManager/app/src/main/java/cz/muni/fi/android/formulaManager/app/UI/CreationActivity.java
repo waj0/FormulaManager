@@ -402,24 +402,24 @@ public class CreationActivity extends ActionBarActivity implements CreateParamDi
                 Arrays.asList(getResources().getStringArray(R.array.constants)));
         List<String> trigonometricFunctions = new ArrayList<String>(
                 Arrays.asList(getResources().getStringArray(R.array.trigonometric_functions)));
-        List<String> relationalOperators = new ArrayList<String>(
-                Arrays.asList(getResources().getStringArray(R.array.relational_operators)));
+//        List<String> relationalOperators = new ArrayList<String>(
+//                Arrays.asList(getResources().getStringArray(R.array.relational_operators)));
         List<String> rounding = new ArrayList<String>(
                 Arrays.asList(getResources().getStringArray(R.array.rounding)));
-        List<String> analysis = new ArrayList<String>(
-                Arrays.asList(getResources().getStringArray(R.array.analysis)));
+//        List<String> analysis = new ArrayList<String>(
+//                Arrays.asList(getResources().getStringArray(R.array.analysis)));
         List<String> generalFunctions = new ArrayList<String>(
                 Arrays.asList(getResources().getStringArray(R.array.general_functions)));
-        List<String> divisorAndMultiple = new ArrayList<String>(
-                Arrays.asList(getResources().getStringArray(R.array.divisor_and_multiple)));
+//        List<String> divisorAndMultiple = new ArrayList<String>(
+//                Arrays.asList(getResources().getStringArray(R.array.divisor_and_multiple)));
 
 
         functionItems.put(functionGroups.get(0), constants);
         functionItems.put(functionGroups.get(1), trigonometricFunctions);
-        functionItems.put(functionGroups.get(2), relationalOperators);
-        functionItems.put(functionGroups.get(3), rounding);
-        functionItems.put(functionGroups.get(4), analysis);
-        functionItems.put(functionGroups.get(5), generalFunctions);
-        functionItems.put(functionGroups.get(6), divisorAndMultiple);
+//        functionItems.put(functionGroups.get(2), relationalOperators);
+        functionItems.put(functionGroups.get(2), rounding);
+//        functionItems.put(functionGroups.get(4), analysis);
+        functionItems.put(functionGroups.get(3), generalFunctions);
+//        functionItems.put(functionGroups.get(6), divisorAndMultiple);
     }
 }

@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -47,7 +48,7 @@ public class Updater extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent)
-    {//TODO synchronization with listfragment
+    {
         Log.d(TAG, "Starting updater");
         try
         {
@@ -70,7 +71,7 @@ public class Updater extends IntentService {
                     {
                         final JSONArray formulas = new JSONArray(sb.toString());
 
-                        List<ContentValues> entityList = new ArrayList<ContentValues>(formulas.length());
+                        List<Formula> entityList = new ArrayList<Formula>(formulas.length());
                         List<ContentValues> categories = new ArrayList<ContentValues>(formulas.length());
                         for (int i = 0; i < formulas.length(); i++)
                         {
@@ -82,23 +83,22 @@ public class Updater extends IntentService {
                                 Log.d(TAG, "Conflict name "+ formula.getName() );
                                continue;
                             }
-                            //TODO uncomment for category adding
-//                            Cursor categoriesCursor = getContentResolver()
-//                                    .query(FormulaSQLHelper.Categories.contentUri(), null, FormulaSQLHelper.Categories.NAME + "=?", new String[]{formula.getCategory()}, null);
-//                            if(categoriesCursor.getCount() == 0) {
-//                                Log.d(TAG, "Adding category " + formula.getCategory());
-//                                ContentValues category = new ContentValues();
-//                                category.put(FormulaSQLHelper.Categories.NAME, formula.getCategory());
-//                                categories.add(category);
-//                            }
-                            entityList.add(Formula.getValues(formula));
+
+                            Cursor categoriesCursor = getContentResolver()
+                                    .query(FormulaSQLHelper.Categories.contentUri(), null, FormulaSQLHelper.Categories.NAME + "=?", new String[]{formula.getCategory()}, null);
+                            if(categoriesCursor.getCount() == 0) {
+                                Log.d(TAG, "Adding category " + formula.getCategory());
+                                ContentValues category = new ContentValues();
+                                category.put(FormulaSQLHelper.Categories.NAME, formula.getCategory());
+                                categories.add(category);
+                            }
+                            entityList.add(formula);
                             Log.d(TAG, "Formula " + formula.getName() + " will be added" );
-                            //TODO insert all parameters
                         }
 
                         int categoryCount = getContentResolver().bulkInsert(FormulaSQLHelper.Categories.contentUri(), categories.toArray(new ContentValues[categories.size()]));
                         Log.d(TAG, "Inserted " +  categoryCount + " categories.");
-                        int formulaCount = getContentResolver().bulkInsert(FormulaSQLHelper.Formulas.contentUri(), entityList.toArray(new ContentValues[entityList.size()]));
+                        int formulaCount = insertFormulas(entityList);
                         Log.d(TAG, "Inserted " +  formulaCount + " formulas.");
                         Intent updateIntent = new Intent("update-UI");
                         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(updateIntent);
@@ -118,10 +118,10 @@ public class Updater extends IntentService {
             }
         } catch (IOException e)
         {
-            //catch new broadcast receiver - updating
             Log.d(TAG, "IO error " + e.getMessage());
         }
     }
+
 
     private static Formula parseFormula(JSONObject formulaJson) throws JSONException {
         Formula formula = new Formula();
@@ -129,8 +129,7 @@ public class Updater extends IntentService {
         formula.setName(formulaJson.getString(JSON_FORMULA_NAME));
         formula.setRawFormula(formulaJson.getString(JSON_FORMULA_RAW));
         formula.setSvgFormula(formulaJson.getString(JSON_FORMULA_SVG));
-        //TODO uncomment when categories reload works
-//        formula.setCategory(formulaJson.getString(JSON_FORMULA_CATEGORY));
+        formula.setCategory(formulaJson.getString(JSON_FORMULA_CATEGORY));
         formula.setFavorite(false);
         List<Parameter> parameterList;
         if(formulaJson.has(JSON_FORMULA_PARAMETERS)) {
@@ -155,5 +154,36 @@ public class Updater extends IntentService {
             parameterList.add(parameter);
         }
     return parameterList;
+    }
+
+    private void addParametersToDatabase(Formula f) {
+
+        for (Parameter param : f.getParams()) {
+            ContentValues values = new ContentValues();
+            values.put(FormulaSQLHelper.Parameters.NAME, param.getName());
+            values.put(FormulaSQLHelper.Parameters.TYPE, param.getType().getIntValue());
+            values.put(FormulaSQLHelper.Parameters.FORMULA_ID, f.getId());
+            getContentResolver().insert(FormulaSQLHelper.Parameters.contentUri(), values);
+
+        }
+    }
+    private int insertFormulas(List<Formula> formulas) {
+        int count =0;
+        for (Formula formula : formulas) {
+            Uri uri = getContentResolver().insert(FormulaSQLHelper.Formulas.contentUri(), Formula.getValues(formula));
+            long newId = getIdOfInsertedObject(uri);
+            if(newId != 0){
+                count++;
+            }
+            formula.setId(newId);
+            addParametersToDatabase(formula);
+        }
+
+        return count;
+    }
+    private long getIdOfInsertedObject(Uri uri) {
+        Cursor c = getContentResolver().query(uri, null, null, null, null);
+        c.moveToFirst();
+        return c.getLong(c.getColumnIndex(FormulaSQLHelper.Formulas._ID));
     }
 }

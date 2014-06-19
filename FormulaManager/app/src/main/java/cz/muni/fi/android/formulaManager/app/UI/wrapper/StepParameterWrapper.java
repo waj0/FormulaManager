@@ -64,7 +64,7 @@ public class StepParameterWrapper extends ParameterWrapper{
             throw new IllegalArgumentException("Illegal values in step parameter ");
         } else
         {
-            for(double i = start; i<end; i+=step){
+            for(double i = start; i<=end; i+=step){
                 list.add(i);
             }
         }

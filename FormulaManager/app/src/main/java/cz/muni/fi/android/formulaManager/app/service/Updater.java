@@ -18,7 +18,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import cz.muni.fi.android.formulaManager.app.database.FormulaSQLHelper;
 import cz.muni.fi.android.formulaManager.app.entity.Formula;
@@ -72,7 +74,7 @@ public class Updater extends IntentService {
                         final JSONArray formulas = new JSONArray(sb.toString());
 
                         List<Formula> entityList = new ArrayList<Formula>(formulas.length());
-                        List<ContentValues> categories = new ArrayList<ContentValues>(formulas.length());
+                        Set<ContentValues> categories = new HashSet<ContentValues>(formulas.length());
                         for (int i = 0; i < formulas.length(); i++)
                         {
                             JSONObject formulaJson = formulas.getJSONObject(i);
@@ -93,7 +95,7 @@ public class Updater extends IntentService {
                                 categories.add(category);
                             }
                             entityList.add(formula);
-                            Log.d(TAG, "Formula " + formula.getName() + " will be added" );
+                            Log.d(TAG, "Formula " + formula.getName() + " will be added");
                         }
 
                         int categoryCount = getContentResolver().bulkInsert(FormulaSQLHelper.Categories.contentUri(), categories.toArray(new ContentValues[categories.size()]));

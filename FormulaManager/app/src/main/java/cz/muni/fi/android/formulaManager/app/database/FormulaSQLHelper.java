@@ -122,7 +122,7 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(INDEX_FORMULA_CATEGORY_CREATE);
 
         //TODO delete dummy values
-        for (int i=0;i<4;i++){
+        /*for (int i=0;i<4;i++){
             String category = "INSERT INTO " + TABLE_CATEGORIES +
                     " ( " + CategoryColumns.NAME + " ) values ( " +
                     "'category" + i + "' " +
@@ -156,7 +156,7 @@ public class FormulaSQLHelper extends SQLiteOpenHelper {
                         " );" ;
                 sqLiteDatabase.execSQL(param);
             }
-        }
+        }*/
     }
 
     public long getLastID(SQLiteDatabase sqLiteDatabase) {

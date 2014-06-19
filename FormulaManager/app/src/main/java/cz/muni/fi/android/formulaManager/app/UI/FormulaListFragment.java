@@ -89,6 +89,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
             // swap new cursor for
             Log.d(TAG, "Updating GUI");
             loadCategoriesFromDB();
+            setDrawerCategories();
             getActivity().getSupportLoaderManager().restartLoader(0, null, FormulaListFragment.this);
             /*Cursor c = getActivity().getContentResolver().query(FormulaSQLHelper.Formulas.contentUri(),
                     null, null, null, null);
@@ -202,45 +203,7 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         //                                   //
 
         //add checkBox for every category to drawer
-        LinearLayout drawerList = (LinearLayout) getActivity().findViewById(R.id.drawer_list);
-        LinearLayout.LayoutParams lptext = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT);
-        lptext.setMargins(0,0,0,8);
-        lptext.weight = 1;
-        LinearLayout.LayoutParams lpbox = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        lpbox.setMargins(0,0,0,8);
-
-        ViewGroup.MarginLayoutParams mlpRow = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        mlpRow.setMargins(0,0,0,8);
-
-        for(int i = 0; i < categoriesCount; i++) {
-            final int pos = i;
-            boolean fill = (i!=0) ; //first should be false, others true
-            mCurCategoryFilter[i] = fill;
-
-            LinearLayout drawerRow = new LinearLayout(getActivity());
-            drawerRow.setLayoutParams(mlpRow);
-            drawerRow.setOrientation(LinearLayout.HORIZONTAL);
-
-            TextView text = new TextView(getActivity());
-            text.setText(categoryNames[i]);
-            text.setTextColor(Color.WHITE);
-            text.setLayoutParams(lptext);
-            drawerRow.addView(text);
-
-            CheckBox category = new CheckBox(getActivity());
-            category.setChecked(fill);
-            category.setLayoutParams(lpbox);
-            category.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    mCurCategoryFilter[pos] = b;
-                    getActivity().getSupportLoaderManager().restartLoader(0, null, FormulaListFragment.this);
-                }
-            });
-            drawerRow.addView(category);
-
-            drawerList.addView(drawerRow);
-        }
+        setDrawerCategories();
 
         //set drawer listeners
         mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close ) {
@@ -358,6 +321,52 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
         mListView.setSwipeDirection(EnhancedListView.SwipeDirection.START);
         if (mDualPane) {
             showDetails(mCurCheckPosition);
+        }
+    }
+
+    private void setDrawerCategories(){
+        LinearLayout drawerList = (LinearLayout) getActivity().findViewById(R.id.drawer_list);
+        LinearLayout.LayoutParams lptext = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lptext.setMargins(0,0,0,8);
+        lptext.weight = 1;
+        LinearLayout.LayoutParams lpbox = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lpbox.setMargins(0,0,0,8);
+
+        ViewGroup.MarginLayoutParams mlpRow = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        mlpRow.setMargins(0,0,0,8);
+
+        for(int i = 0; i < categoriesCount; i++) {
+            final int pos = i;
+            boolean fill = (i!=0) ; //first should be false, others true
+            mCurCategoryFilter[i] = fill;
+
+            LinearLayout drawerRow = new LinearLayout(getActivity());
+            drawerRow.setLayoutParams(mlpRow);
+            drawerRow.setOrientation(LinearLayout.HORIZONTAL);
+            drawerRow.setId(i);
+            View check = mDrawerLayout.findViewById(i);
+
+            if(check == null) {
+                TextView text = new TextView(getActivity());
+                text.setText(categoryNames[i]);
+                text.setTextColor(Color.WHITE);
+                text.setLayoutParams(lptext);
+                drawerRow.addView(text);
+
+                CheckBox category = new CheckBox(getActivity());
+                category.setChecked(fill);
+                category.setLayoutParams(lpbox);
+                category.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                        mCurCategoryFilter[pos] = b;
+                        getActivity().getSupportLoaderManager().restartLoader(0, null, FormulaListFragment.this);
+                    }
+                });
+                drawerRow.addView(category);
+
+                drawerList.addView(drawerRow);
+            }
         }
     }
 

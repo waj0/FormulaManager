@@ -249,6 +249,10 @@ public class FormulaListFragment extends Fragment implements SearchView.OnQueryT
                 Log.i(TAG, position + " long click");
 
                 Formula f = getFormula(position);
+                if(f.getCategory() == null || f.getCategory().isEmpty()){
+                    Toast.makeText(getActivity(), "You can not edit default formulas", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
 
                 Intent intent = new Intent(getActivity(), CreationActivity.class);
                 intent.putExtra(FORMULA, f);
